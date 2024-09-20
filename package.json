@@ -13,24 +13,22 @@
     "clean": "rimraf dist include script.lua node_modules pnpm-lock.yaml"
   },
   "devDependencies": {
+    "@rbxts/compiler-types": "3.0.0-types.0",
+    "@rbxts/types": "^1.0.807",
     "@typescript-eslint/eslint-plugin": "^8.6.0",
     "@typescript-eslint/parser": "^8.6.0",
+    "darklua": "file:external/darklua",
     "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-roblox-ts": "^0.0.36",
-    "nodemon": "^3.1.5",
+    "nodemon": "^3.1.6",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
-    "shx": "^0.3.4",
-    "typescript": "^5.6.2"
-  },
-  "dependencies": {
-    "@rbxts/compiler-types": "3.0.0-types.0",
-    "@rbxts/types": "^1.0.807",
-    "darklua": "file:external/darklua",
     "roblox-ts": "^3.0.0",
+    "shx": "^0.3.4",
     "tape-lua": "file:external/tape-lua",
+    "typescript": "^5.6.2",
     "unc-types": "file:external/unc-types"
   }
 }
