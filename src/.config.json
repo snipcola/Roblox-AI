@@ -1,0 +1,21 @@
+{
+  "Script": {
+    "Name": "RobloxAI",
+    "Whitelist": [],
+    "Blacklist": [],
+    "Debug": false
+  },
+  "Settings": {
+    "AntiAFK": true,
+    "MinimumDistance": 5,
+    "MessageProcessDelay": 1
+  },
+  "AI": {
+    "Prompt": "",
+    "Model": "gpt-4o-mini",
+    "MaximumCharacterLimit": 200,
+    "MaximumMessageContext": 5,
+    "Api": "https://api.openai.com/v1/chat/completions",
+    "Key": "OPENAI_API_KEY"
+  }
+}
