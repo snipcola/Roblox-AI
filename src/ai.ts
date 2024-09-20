@@ -282,8 +282,13 @@ function addMessage(message: Message) {
   store.set("AIMessages", messages);
 }
 
+function aiSendMessage(message: string) {
+  store.set("AIMessageSent", true);
+  chat.sendMessage(message);
+}
+
 function failedChatCompletion() {
-  chat.sendMessage("⛔ Sorry, something went wrong. Try again.");
+  aiSendMessage("⛔ Sorry, something went wrong. Try again.");
 }
 
 function parseFunctionArguments<T>(func: ToolCallFunction): T | undefined {
@@ -311,7 +316,7 @@ function sendMessage({
   interval: number;
 }) {
   for (let i = 0; i < amount; i++) {
-    chat.sendMessage(message);
+    aiSendMessage(message);
     task.wait(interval);
   }
 }
@@ -477,7 +482,7 @@ function createChatCompletion(content: string, name: string) {
     Body: httpService.JSONEncode(data),
   });
 
-  if (!Success) {
+  if (Success === false) {
     failedChatCompletion();
     log("error", "AI", "Request not successful");
     return;
@@ -508,7 +513,7 @@ function createChatCompletion(content: string, name: string) {
       ? responseMessage?.content?.sub(0, config.AI.MaximumCharacterLimit)
       : responseMessage?.content;
 
-    chat.sendMessage(messageContent);
+    aiSendMessage(messageContent);
     log("debug", "AI", messageContent);
   }
 

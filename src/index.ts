@@ -9,6 +9,7 @@ import chat from "chat";
 import config from "config";
 import ai from "ai";
 import antiafk from "antiafk";
+import store from "store";
 
 log("debug", "Script", "Started execution");
 
@@ -19,12 +20,13 @@ let locked = false;
 
 chat.onMessage(function (message, speaker) {
   if (isLocalPlayer(speaker)) {
-    if (isTagged(message)) {
+    if (store.get<boolean>("AIMessageSent") && isTagged(message)) {
       chat.sendMessage(
         "⛔ Sorry, my message was tagged. Try again or re-phrase your message.",
       );
     }
 
+    store.set("AIMessageSent", false);
     return;
   }
 
