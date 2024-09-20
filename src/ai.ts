@@ -1,6 +1,10 @@
 import chat from "chat";
 import config from "config";
-import { getPlayerHumanoid, getPlayerPrimaryPart } from "functions";
+import {
+  getPlayerFromPartialName,
+  getPlayerHumanoid,
+  getPlayerPrimaryPart,
+} from "functions";
 import log from "log";
 import store from "store";
 
@@ -322,7 +326,7 @@ function sendMessage({
 }
 
 function teleportToPlayer({ player: name }: { player: string }) {
-  const player = players.GetPlayers().find((p) => p.Name === name);
+  const player = getPlayerFromPartialName(name);
   if (!player) return;
 
   const localPlayerPrimaryPart = getPlayerPrimaryPart(localPlayer);
@@ -347,13 +351,13 @@ function walkToPlayer({
   follow: boolean;
   jump: boolean;
 }) {
+  const player = getPlayerFromPartialName(name);
+  if (!player) return;
+
   if (store.get("WalkingToPlayer")) {
     stopWalkingToPlayer();
     task.wait();
   }
-
-  const player = players.GetPlayers().find((p) => p.Name === name);
-  if (!player) return;
 
   let localPlayerHumanoid = getPlayerHumanoid(localPlayer);
   if (!localPlayerHumanoid) return;
@@ -457,7 +461,7 @@ const availableFunctions: AvailableFunctions = [
 function createChatCompletion(content: string, name: string) {
   const message: Message = {
     role: "user",
-    content,
+    content: `${name}: ${content}`,
     name,
   };
 

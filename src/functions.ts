@@ -68,3 +68,25 @@ export function getPlayerHumanoid(player: Player) {
 export function getPlayerPrimaryPart(player: Player) {
   return player.Character?.PrimaryPart;
 }
+
+function startsWith(one: string, two: string) {
+  return one.sub(1, two.size()) === two;
+}
+
+export function getPlayerFromPartialName(name: string): Player | undefined {
+  name = name.lower();
+
+  return players
+    .GetPlayers()
+    .filter((p) => p !== localPlayer)
+    .find(function ({ Name, DisplayName }) {
+      Name = Name.lower();
+      DisplayName = DisplayName.lower();
+
+      return (
+        [Name, DisplayName].includes(name) ||
+        startsWith(Name, name) ||
+        startsWith(DisplayName, name)
+      );
+    });
+}
