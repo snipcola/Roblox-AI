@@ -13,9 +13,10 @@ function setBinaryPath(binary) {
   binaryPath = path.join(__dirname, "bin", binary);
 }
 
-function chmodBinary() {
+function prepareBinary() {
   try {
     execFileSync("chmod", ["+x", binaryPath]);
+    execFileSync("xattr", ["-cr", binaryPath]);
   } catch {}
 }
 
@@ -23,12 +24,12 @@ if (platform === "linux") {
   setBinaryPath(
     arch === "arm64" ? "darklua-linux-aarch64" : "darklua-linux-x86_64",
   );
-  chmodBinary();
+  prepareBinary();
 } else if (platform === "darwin") {
   setBinaryPath(
     arch === "arm64" ? "darklua-macos-aarch64" : "darklua-macos-x86_64",
   );
-  chmodBinary();
+  prepareBinary();
 } else if (platform === "win32") {
   setBinaryPath("darklua-windows-x86_64.exe");
 } else {
@@ -65,10 +66,8 @@ function minifyAndCleanFile(file) {
   minifyFile(file);
 }
 
-const args = process.argv.slice(2);
-const [file, minFile] = args;
-
-copyFile(file, minFile);
-
-minifyFile(file);
-minifyAndCleanFile(minFile);
+module.exports = function (file, minFile) {
+  copyFile(file, minFile);
+  minifyFile(file);
+  minifyAndCleanFile(minFile);
+};

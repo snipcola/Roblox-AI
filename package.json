@@ -1,34 +1,27 @@
 {
   "name": "roblox-ai",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Snipcola",
   "license": "MIT",
+  "type": "commonjs",
   "scripts": {
-    "build": "pnpm --silent build-clean && pnpm --silent build-bundle && pnpm --silent build-clean && pnpm --silent build-move && pnpm --silent build-minify && echo \"3. Complete\" && echo",
-    "build-clean": "rimraf dist include",
-    "build-bundle": "echo \"1. Build\" && rbxtsc && node build.js && tape dist",
-    "build-move": "shx mkdir dist && shx mv script.lua dist",
-    "build-minify": "echo \"2. Minification\" && darklua dist/script.lua dist/script.min.lua",
-    "dev": "nodemon --quiet --watch src --ext \"*\" --exec pnpm --silent build",
-    "clean": "rimraf dist include script.lua node_modules pnpm-lock.yaml"
+    "build": "node assets/build",
+    "dev": "node assets/dev",
+    "clean": "node assets/clean"
   },
   "devDependencies": {
     "@rbxts/compiler-types": "3.0.0-types.0",
     "@rbxts/types": "^1.0.807",
     "@typescript-eslint/eslint-plugin": "^8.6.0",
     "@typescript-eslint/parser": "^8.6.0",
-    "darklua": "file:external/darklua",
     "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-roblox-ts": "^0.0.36",
-    "nodemon": "^3.1.6",
     "prettier": "^3.3.3",
-    "rimraf": "^6.0.1",
     "roblox-ts": "^3.0.0",
-    "shx": "^0.3.4",
-    "tape-lua": "file:external/tape-lua",
     "typescript": "^5.6.2",
-    "unc-types": "file:external/unc-types"
+    "unc-types": "file:assets/types/unc",
+    "yocto-spinner": "^0.1.0"
   }
 }

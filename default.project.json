@@ -1,5 +1,5 @@
 {
-  "name": "rbxts",
+  "name": "roblox-ts",
   "globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
   "tree": {
     "$path": "dist",
