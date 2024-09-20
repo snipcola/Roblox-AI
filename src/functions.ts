@@ -55,7 +55,7 @@ function isBlacklisted(player: Player) {
   return config.Script.Blacklist.includes(player.Name);
 }
 
-export function playerIsAllowed(player: Player) {
+export function isPlayerAllowed(player: Player) {
   return (
     playerInDistance(player) && isWhitelisted(player) && !isBlacklisted(player)
   );

@@ -2,7 +2,7 @@ import log from "log";
 import {
   waitForGameLoad,
   isLocalPlayer,
-  playerIsAllowed,
+  isPlayerAllowed,
   isTagged,
 } from "functions";
 import chat from "chat";
@@ -28,7 +28,7 @@ chat.onMessage(function (message, speaker) {
     return;
   }
 
-  if (locked || !playerIsAllowed(speaker) || isTagged(message)) {
+  if (locked || !isPlayerAllowed(speaker) || isTagged(message)) {
     return;
   }
 
