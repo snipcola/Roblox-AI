@@ -1,18 +1,23 @@
-const fs = require("fs");
+const { watch } = require("chokidar");
 const build = require("./build");
 
 let lock = false;
 
 function watchFolder(folder) {
-  fs.watch(folder, async function (_, file) {
-    if (!lock && file) {
-      lock = true;
-      await build();
+  const watcher = watch(folder, {
+    usePolling: true,
+    interval: 100,
+    depth: 100,
+  });
 
-      setTimeout(function () {
-        lock = false;
-      }, 100);
-    }
+  watcher.once("ready", function () {
+    watcher.on("all", async function (_, path) {
+      if (lock || !path) return;
+      lock = true;
+
+      await build();
+      lock = false;
+    });
   });
 }
 
