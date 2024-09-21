@@ -4,6 +4,7 @@ import {
   getPlayerFromPartialName,
   getPlayerHumanoid,
   getPlayerPrimaryPart,
+  isPlayerInAir,
 } from "functions";
 import log from "log";
 import store from "store";
@@ -373,8 +374,6 @@ function walkToPlayer({
     if (!(store.get("WalkingToPlayer") && players.FindFirstChild(name))) break;
     if (!(localPlayerHumanoid && playerPrimaryPart)) return;
 
-    localPlayerHumanoid.MoveTo(playerPrimaryPart.Position);
-
     const localPlayerPrimaryPart = getPlayerPrimaryPart(localPlayer);
 
     if (
@@ -383,7 +382,11 @@ function walkToPlayer({
       player.DistanceFromCharacter(localPlayerPrimaryPart?.Position) <= 2.5
     ) {
       stopWalkingToPlayer();
+      return;
     }
+
+    localPlayerHumanoid.MoveTo(playerPrimaryPart.Position);
+    if (isPlayerInAir(player)) jump({ amount: 1, interval: 0 });
   }
 }
 
@@ -404,7 +407,7 @@ function jump({ amount, interval }: { amount: number; interval: number }) {
   for (let i = 0; i < amount; i++) {
     const localPlayerHumanoid = getPlayerHumanoid(localPlayer);
 
-    if (localPlayerHumanoid) {
+    if (!isPlayerInAir(localPlayer) && localPlayerHumanoid) {
       localPlayerHumanoid.ChangeState(Enum.HumanoidStateType.Jumping);
       task.wait(interval);
     }
@@ -532,7 +535,7 @@ function createChatCompletion(content: string, name: string) {
       if (args) {
         addMessage({
           role: "assistant",
-          content: `Used ${availableFunction.name}.`,
+          content: `Used ${availableFunction.name}. This is automated, do not send messages like this - instead use actual functions.`,
         });
 
         log(

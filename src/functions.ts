@@ -90,3 +90,9 @@ export function getPlayerFromPartialName(name: string): Player | undefined {
       );
     });
 }
+
+export function isPlayerInAir(player: Player): boolean {
+  return (
+    getPlayerHumanoid(player)?.GetState() === Enum.HumanoidStateType.Freefall
+  );
+}
