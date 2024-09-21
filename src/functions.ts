@@ -96,3 +96,14 @@ export function isPlayerInAir(player: Player): boolean {
     getPlayerHumanoid(player)?.GetState() === Enum.HumanoidStateType.Freefall
   );
 }
+
+export function jump(): boolean {
+  const localPlayerHumanoid = getPlayerHumanoid(localPlayer);
+
+  if (!isPlayerInAir(localPlayer) && localPlayerHumanoid) {
+    localPlayerHumanoid.ChangeState(Enum.HumanoidStateType.Jumping);
+    return true;
+  }
+
+  return false;
+}
