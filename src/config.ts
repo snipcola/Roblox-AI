@@ -16,6 +16,7 @@ interface Settings {
 interface AI {
   Prompt: string;
   Model: string;
+  EnabledFunctions: string[];
   MaximumCharacterLimit: number | null;
   MaximumMessageContext: number | null;
   Api: string;

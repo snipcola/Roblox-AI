@@ -118,7 +118,7 @@ const tools: Tools = [
     function: {
       name: "sendMessage",
       description:
-        "Sends a message into the Roblox chat. Only use this when you're using another function, to give the user confirmation.",
+        "Sends a message into the Roblox chat. Use this in conjunction with other functions, to provide the user confirmation.",
       parameters: {
         type: "object",
         properties: {
@@ -258,7 +258,7 @@ const tools: Tools = [
       strict: true,
     },
   },
-];
+].filter((t) => config.AI.EnabledFunctions.includes(t.function.name)) as Tools;
 
 if (config.AI.MaximumCharacterLimit) {
   systemMessages.push({
@@ -459,7 +459,7 @@ const availableFunctions: AvailableFunctions = [
     name: "setJumpPower",
     callback: setJumpPower,
   },
-];
+].filter((f) => config.AI.EnabledFunctions.includes(f.name));
 
 function createChatCompletion(content: string, name: string) {
   const message: Message = {
@@ -473,8 +473,12 @@ function createChatCompletion(content: string, name: string) {
   const data: Request = {
     model: config.AI.Model,
     messages: [...systemMessages, ...messages],
-    tools,
-    parallel_tool_calls: true,
+    ...(tools.size() > 0
+      ? {
+          tools,
+          parallel_tool_calls: true,
+        }
+      : {}),
   };
 
   log("debug", "AI", "Sent request");

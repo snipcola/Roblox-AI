@@ -13,6 +13,15 @@
   "AI": {
     "Prompt": "",
     "Model": "gpt-4o-mini",
+    "EnabledFunctions": [
+      "sendMessage",
+      "teleportToPlayer",
+      "walkToPlayer",
+      "stopWalkingToPlayer",
+      "jump",
+      "setWalkSpeed",
+      "setJumpPower"
+    ],
     "MaximumCharacterLimit": 200,
     "MaximumMessageContext": 5,
     "Api": "https://api.openai.com/v1/chat/completions",
