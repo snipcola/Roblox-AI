@@ -1,20 +1,21 @@
 {
   "name": "roblox-ai",
-  "version": "0.0.5",
   "author": "Snipcola",
-  "license": "MIT",
+  "version": "0.0.6",
   "type": "commonjs",
   "scripts": {
-    "build": "node assets/build",
-    "dev": "node assets/dev",
-    "clean": "node assets/clean"
+    "build": "node assets/ci/build",
+    "dev": "node assets/ci/dev",
+    "clean": "node assets/ci/clean"
   },
   "devDependencies": {
+    "@file/types": "file:assets/types",
     "@rbxts/compiler-types": "3.0.0-types.0",
     "@rbxts/types": "^1.0.807",
     "@typescript-eslint/eslint-plugin": "^8.6.0",
     "@typescript-eslint/parser": "^8.6.0",
     "chokidar": "^4.0.0",
+    "darklua-bin-wrapper": "^0.0.2",
     "eslint": "^9.10.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
@@ -22,7 +23,6 @@
     "prettier": "^3.3.3",
     "roblox-ts": "^3.0.0",
     "typescript": "^5.6.2",
-    "unc-types": "file:assets/types/unc",
     "yocto-spinner": "^0.1.0"
   }
 }

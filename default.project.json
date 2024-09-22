@@ -1,8 +1,11 @@
 {
-  "name": "roblox-ts",
-  "globIgnorePaths": ["**/package.json", "**/tsconfig.json"],
+  "name": "Roblox-AI",
+  "globIgnorePaths": [
+    "**/package.json",
+    "**/tsconfig.json"
+  ],
   "tree": {
-    "$path": "dist",
+    "$path": "out",
     "include": {
       "$path": "include",
       "node_modules": {
