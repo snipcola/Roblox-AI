@@ -7,7 +7,7 @@ Become an AI on Roblox.
 Make sure the following are installed:
 
 - [node](https://nodejs.org/en/download)
-- [pnpm](https://pnpm.io/installation) (optional)
+- [pnpm](https://pnpm.io/installation#using-a-standalone-script) (optional)
 
 It's recommended you also install the following VSCode extensions:
 
@@ -22,14 +22,14 @@ If you installed `pnpm`, use that instead of `npm` for the following steps.
 1. **Download / Clone**
 
    Download the project as a zip, or clone it with [Git](https://git-scm.com/downloads) like so:
+
    ```
    git clone [git_url]
    ```
 
-
 2. **Develop**
 
-   Open the folder in an IDE, preferably [VSCode](https://code.visualstudio.com), and run ``(p)npm install`` - you only have to do this once, unless you install more packages.<br/><br/>
+   Open the folder in an IDE, preferably [VSCode](https://code.visualstudio.com), and run `(p)npm install` - you only have to do this once, unless you install more packages.<br/><br/>
 
    In the VSCode Terminal, you can execute `npm run dev / pnpm dev`. Now you can edit files in `src`, and it will compile to `out` when you save.
 

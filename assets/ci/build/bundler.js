@@ -65,7 +65,10 @@ class Stringify {
       if cached then return cached.value end
 
       local success, result = pcall(fn, __scripts[module])
-      if not success then return end
+      if not success then
+        error(result)
+        return
+      end
 
       __cache[module] = { value = result }
       task.wait()
@@ -159,7 +162,7 @@ class Bundler {
     },
   ];
 
-  initFiles = ["init", "index", "main"].flatMap(function (name) {
+  initFiles = ["init"].flatMap(function (name) {
     return ["lua", "luau"].map((extension) => `${name}.${extension}`);
   });
 

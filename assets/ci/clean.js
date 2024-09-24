@@ -1,4 +1,6 @@
 const fs = require("fs");
+const process = require("process");
+
 const { measure } = require("./shared/functions");
 
 function clean(folders) {
@@ -10,7 +12,6 @@ function clean(folders) {
 const config = {
   clean: [
     "out",
-    "include",
     "script.lua",
     "node_modules",
     "pnpm-lock.yaml",
@@ -24,7 +25,8 @@ function main() {
   try {
     clean(config.clean);
   } catch {
-    return console.error("Failed to clean");
+    console.error("Failed to clean");
+    process.exit(1);
   }
 }
 
