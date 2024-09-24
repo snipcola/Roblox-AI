@@ -161,7 +161,7 @@ function clean(folders) {
 }
 
 function minify(file) {
-  minifier.minifyFile(
+  minifier.processFile(
     file,
     null,
     path.resolve(__dirname, "config", `${path.basename(file)}.json`),
