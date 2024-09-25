@@ -236,7 +236,7 @@ class Bundler {
     const module = names.find((n) => n.module === node)?.name;
     const children = [...node.children].map((c) => this.makeTree(c, names));
 
-    return [[name, module], children];
+    return [module ? [name, module] : [name], children];
   }
 
   bundle(path, { output: _output }) {
