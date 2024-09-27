@@ -1,7 +1,11 @@
+const os = require("os");
 const fs = require("fs");
+
 const path = require("path");
 const process = require("process");
+
 const { spawnSync } = require("child_process");
+const { lookpath } = require("lookpath");
 
 const build = require("roblox-ts/out/CLI/commands/build");
 const { measure } = require("../shared/functions");
@@ -14,22 +18,31 @@ function clean(folders) {
 }
 
 function executeCommand(command, args, cwd) {
-  const windows = process.platform === "win32";
-
+  const useCMD =
+    process.platform === "win32" && !command?.toLowerCase()?.endsWith(".exe");
   const result = spawnSync(
-    windows ? "cmd.exe" : command,
-    windows ? ["/c", command, ...args] : args,
+    useCMD ? "cmd.exe" : command,
+    useCMD ? ["/c", command, ...args] : args,
     {
       cwd,
-      stdio: ["ignore", "ignore", "pipe"],
+      stdio: ["ignore", "pipe", "pipe"],
     },
   );
 
-  return result.error === undefined;
+  return {
+    success: result.error === undefined,
+    output: result.stdout.toString(),
+    error: result.stderr.toString(),
+  };
 }
 
-function minifyFile(file) {
-  const success = executeCommand("darklua", [
+async function getDarklua() {
+  const directory = path.resolve(os.homedir(), ".aftman", "bin");
+  return await lookpath("darklua", { include: [directory] });
+}
+
+function minifyFile(darklua, file) {
+  const { success } = executeCommand(darklua, [
     "process",
     "--config",
     path.resolve(__dirname, "config", `${path.basename(file)}.json`),
@@ -73,6 +86,17 @@ const config = {
 async function main() {
   const { default: yocto } = await import("yocto-spinner");
   const spinner = yocto({ text: "Building", color: "blue" }).start();
+  const darklua = await getDarklua();
+
+  function error(...args) {
+    spinner.error(...args);
+    clean(config.clean);
+    process.exit(1);
+  }
+
+  if (!darklua) {
+    error("Couldn't find 'darklua'");
+  }
 
   const elapsed = measure(function () {
     try {
@@ -83,9 +107,7 @@ async function main() {
         includePath: config.include,
       });
     } catch {
-      spinner.error("Failed to build");
-      clean(config.clean);
-      process.exit(1);
+      error("Failed to build");
     }
 
     try {
@@ -93,9 +115,7 @@ async function main() {
       spinner.color = "yellow";
       bundler(config);
     } catch {
-      spinner.error("Failed to bundle");
-      clean(config.clean);
-      process.exit(1);
+      error("Failed to bundle");
     }
 
     try {
@@ -106,24 +126,20 @@ async function main() {
       fs.mkdirSync(config.folder, { recursive: true });
       fs.renameSync(path.basename(config.output), config.output);
     } catch {
-      spinner.error("Failed to move files");
-      clean(config.clean);
-      process.exit(1);
+      error("Failed to move files");
     }
 
     try {
       spinner.text = "Minifying";
       spinner.color = "green";
 
-      minifyFile(config.output);
+      minifyFile(darklua, config.output);
       fs.cpSync(config.output, config.outputMin, { force: true });
 
       cleanFile(config.outputMin);
-      minifyFile(config.outputMin);
+      minifyFile(darklua, config.outputMin);
     } catch {
-      spinner.error("Failed to minify");
-      clean(config.clean);
-      process.exit(1);
+      error("Failed to minify");
     }
   });
 
