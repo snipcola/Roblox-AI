@@ -2,11 +2,53 @@
 
 Become an AI on Roblox.
 
-## Prerequisites
+## Script
+
+If you don't want to compile it, you can use the latest release via loadstring - don't forget to add your API key.
+
+```lua
+getgenv()["RobloxAI.Config"] = {
+  Script = {
+    Name = "RobloxAI",
+    Whitelist = {},
+    Blacklist = {},
+    Debug = false
+  },
+  Settings = {
+    AntiAFK = true,
+    MinimumDistance = 5,
+    MessageProcessDelay = 1
+  },
+  AI = {
+    Prompt = "",
+    Model = "gpt-4o-mini",
+    EnabledFunctions = {
+      "sendMessage",
+      "teleportToPlayer",
+      "walkToPlayer",
+      "stopWalkingToPlayer",
+      "jump",
+      "setWalkSpeed",
+      "setJumpPower"
+    },
+    MaximumCharacterLimit = 200,
+    MaximumMessageContext = 5,
+    Api = "https://api.openai.com/v1/chat/completions",
+    Key = "" -- Replace with your OpenAI API key.
+  }
+}
+
+loadstring(game:HttpGetAsync("https://github.com/snipcola/Roblox-AI/releases/latest/download/script.min.lua"))()
+```
+
+## Compilation
+
+### Prerequisites
 
 Make sure the following are installed:
 
 - [node](https://nodejs.org/en/download)
+- [aftman](https://github.com/LPGhatguy/aftman/releases/latest)
 - [pnpm](https://pnpm.io/installation#using-a-standalone-script) (optional)
 
 It's recommended you also install the following VSCode extensions:
@@ -15,7 +57,7 @@ It's recommended you also install the following VSCode extensions:
 - [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 - [Roblox-TS](https://marketplace.visualstudio.com/items?itemName=roblox-ts.vscode-roblox-ts)
 
-## Instructions
+### Instructions
 
 If you installed `pnpm`, use that instead of `npm` for the following steps.
 
@@ -27,12 +69,14 @@ If you installed `pnpm`, use that instead of `npm` for the following steps.
    git clone [git_url]
    ```
 
-2. **Develop**
+2. **Install Dependencies**
 
-   Open the folder in an IDE, preferably [VSCode](https://code.visualstudio.com), and run `(p)npm install` - you only have to do this once, unless you install more packages.<br/><br/>
+   Open the folder in an IDE, preferably [VSCode](https://code.visualstudio.com), and run `(p)npm install` - you only have to do this once, unless you install more packages.
+
+3. **Develop**
 
    In the VSCode Terminal, you can execute `npm run dev / pnpm dev`. Now you can edit files in `src`, and it will compile to `out` when you save.
 
-3. **Build**
+4. **Build**
 
    If you'd like to manually start the build process, instead of running the dev script, run `npm run build / pnpm build` which will build once.

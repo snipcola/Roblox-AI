@@ -1,12 +1,13 @@
 {
   "name": "roblox-ai",
   "author": "Snipcola",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "type": "commonjs",
   "scripts": {
     "build": "node assets/ci/build",
     "dev": "node assets/ci/dev",
-    "clean": "node assets/ci/clean"
+    "clean": "node assets/ci/clean",
+    "release": "git push origin main:release -f"
   },
   "devDependencies": {
     "@file/types": "file:assets/types",
@@ -15,7 +16,6 @@
     "@typescript-eslint/eslint-plugin": "^8.7.0",
     "@typescript-eslint/parser": "^8.7.0",
     "chokidar": "^4.0.1",
-    "darklua-bin-wrapper": "^0.0.3",
     "eslint": "^9.11.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",

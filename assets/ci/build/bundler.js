@@ -1,40 +1,5 @@
 const fs = require("fs");
-const _path = require("path");
-
-class Node {
-  constructor(type, path) {
-    this.type = type;
-    this.path = path;
-    this.children = new Set();
-    this.basename = _path.basename(this.path);
-  }
-
-  addChild(node) {
-    this.children.add(node);
-    return node;
-  }
-
-  getChildNode(type, path) {
-    return this.addChild(new Node(type, path));
-  }
-
-  toString() {
-    return `${this.basename}${this.type === "Folder" ? " (dir)" : ""}`;
-  }
-
-  findFirstChild(basename) {
-    return Array.from(this.children).find(
-      (child) => child.basename === basename,
-    );
-  }
-
-  flatten() {
-    return [
-      this,
-      ...Array.from(this.children).flatMap((child) => child.flatten()),
-    ];
-  }
-}
+const path = require("path");
 
 class Stringify {
   process(lua) {
@@ -122,13 +87,13 @@ class Stringify {
 
   tree(json) {
     return this.process(`
-      __.b(${this.prepareJSON(json)})
+      __.b(${this.prepareJSON(...json)})
     `);
   }
 
-  footer(name) {
+  footer(index) {
     return this.process(`
-      return require("${name}");
+      return require(${index});
     `);
   }
 }
@@ -136,6 +101,13 @@ class Stringify {
 const stringify = new Stringify();
 
 class Bundler {
+  config = {};
+  initFiles = ["init.luau", "init.lua"];
+
+  constructor(config) {
+    this.config = config;
+  }
+
   transformers = [
     {
       extension: [".lua", ".luau"],
@@ -162,10 +134,6 @@ class Bundler {
     },
   ];
 
-  initFiles = ["init"].flatMap(function (name) {
-    return ["lua", "luau"].map((extension) => `${name}.${extension}`);
-  });
-
   getTransformer(extension) {
     return this.transformers.find(function ({ extension: _extension }) {
       return Array.isArray(_extension)
@@ -174,118 +142,234 @@ class Bundler {
     });
   }
 
-  canBundle(basename) {
-    return this.getTransformer(_path.extname(basename)) !== undefined;
-  }
-
-  explore(directory, node) {
-    if (!node) node = new Node("Folder", directory);
-    const files = fs.readdirSync(directory, { withFileTypes: true });
-
-    for (const file of files) {
-      const path = _path.resolve(directory, file.name);
-
-      if (file.isFile() && this.canBundle(file.name)) {
-        node.getChildNode("Module", path);
-      } else if (file.isDirectory()) {
-        const child = node.getChildNode("Folder", path);
-        this.explore(path, child);
-
-        if (child.children.size === 0) {
-          node.children.delete(child);
-        }
-      }
+  fetchFiles(contents, filePath, attemptedPaths) {
+    if (attemptedPaths?.has(filePath)) {
+      return new Set();
     }
 
-    return node;
-  }
+    const fileName = path.basename(filePath);
+    const isInit = this.initFiles.includes(fileName);
+    const { nodeModules, include } = this.config;
 
-  initialize(node) {
-    const initNode = this.initFiles
-      .map((f) => node.findFirstChild(f))
-      .filter((f) => f !== undefined)
-      .shift();
+    function scriptToPath(args) {
+      const isScript = args[0] === "script";
+      const pathList = isScript && !isInit ? [] : [".."];
+      if (isScript) args.shift();
 
-    if (initNode && initNode.type === "Module") {
-      for (const child of Array.from(node.children).filter(
-        (c) => c !== initNode,
-      )) {
-        initNode.addChild(child);
+      for (const arg of args) {
+        pathList.push(arg === "Parent" ? ".." : arg);
       }
 
-      initNode.basename = node.basename;
-
-      node.children.clear();
-      node = initNode;
+      return pathList;
     }
 
-    const children = [...node.children].map((c) => this.initialize(c));
-    node.children.clear();
-
-    for (const child of children) {
-      node.addChild(child);
-    }
-
-    return node;
-  }
-
-  makeTree(node, names) {
-    const extension = _path.extname(node.basename);
-    const name = _path.basename(node.basename, extension);
-
-    const module = names.find((n) => n.module === node)?.name;
-    const children = [...node.children].map((c) => this.makeTree(c, names));
-
-    return [module ? [name, module] : [name], children];
-  }
-
-  bundle(path, { output: _output }) {
-    if (!fs.statSync(path).isDirectory()) {
-      throw new Error("Path is not a directory.");
-    }
-
-    path = _path.resolve(path);
-
-    const root = this.explore(path);
-    const entryNode = this.initialize(root);
-
-    if (entryNode.type !== "Module") {
-      throw new Error("No entrypoint.");
-    }
-
-    const entries = entryNode.flatten();
-    const modules = entries.filter((n) => n.type === "Module");
-
-    const output = [stringify.polyfill];
-    const names = modules.map((module, index) => {
-      path = _path.relative(path, module.path);
-      const extension = _path.extname(path);
-
-      const transformer = this.getTransformer(extension);
-      if (!transformer) throw new Error(`No transformer for ${extension}.`);
-
-      const contents = fs.readFileSync(module.path, "utf8");
-      output.push(
-        transformer.transform(stringify.prepareJSON(index), contents),
-      );
+    function toPath(args, forceArgs) {
+      if (!args) return;
+      const context = args.shift();
 
       return {
-        name: index.toString(),
-        module,
+        path: path.resolve(
+          filePath,
+          [...scriptToPath(context.split(".")), ...args].join("/"),
+        ),
+        args: forceArgs || args,
+      };
+    }
+
+    function getPath({ path: _path, args }) {
+      if (!_path) return;
+
+      function tryGetPath(_path) {
+        try {
+          const extensions = ["lua", "luau", "json", "txt"];
+          const isDirectory =
+            fs.existsSync(_path) && fs.statSync(_path).isDirectory();
+
+          const paths = isDirectory
+            ? extensions.map((e) => path.resolve(_path, `init.${e}`))
+            : path.extname(_path)
+              ? [_path]
+              : extensions.map((e) => `${_path}.${e}`);
+
+          for (const _path of paths) {
+            if (
+              fs.existsSync(_path) &&
+              extensions.some((e) => _path.endsWith(`.${e}`))
+            ) {
+              return _path;
+            }
+          }
+        } catch {}
+      }
+
+      let result = tryGetPath(_path);
+      if (result) return result;
+
+      if (
+        typeof args === "object" &&
+        args.join("/").startsWith("include/node_modules/")
+      ) {
+        result = tryGetPath(
+          path.resolve(nodeModules, args.splice(2).join("/")),
+        );
+      } else if (
+        typeof args === "string" &&
+        args.split(".").splice(-2, 1).join() === "include"
+      ) {
+        result = tryGetPath(path.resolve(include, args.split(".").pop()));
+      }
+
+      if (result) return result;
+    }
+
+    const processPath = (_path) => {
+      if (!_path || paths.has(_path) || _path === filePath) return;
+
+      const contents = fs.readFileSync(_path, "utf8");
+      if (!contents) return;
+
+      paths.add(_path);
+      paths = new Set([
+        ...paths,
+        ...this.fetchFiles(contents, _path, attemptedPaths),
+      ]);
+    };
+
+    const tsImportRegex = /TS\.import\(([^)]+)\)/g;
+    const requireRegex = /require\(([^)]+)\)/g;
+
+    let paths = new Set();
+    if (!attemptedPaths) attemptedPaths = new Set();
+    attemptedPaths.add(filePath);
+
+    let match;
+
+    while ((match = tsImportRegex.exec(contents)) !== null) {
+      const args =
+        match[1] &&
+        match[1].split(",").map((arg) => arg.trim().replace(/^"|"$/g, ""));
+      args.shift();
+
+      processPath(getPath(toPath(args)));
+    }
+
+    while ((match = requireRegex.exec(contents)) !== null) {
+      processPath(getPath(toPath([match[1]], match[1])));
+    }
+
+    return paths;
+  }
+
+  createTree(files) {
+    const { root: rootFolder, folder, include } = this.config;
+
+    function toArray(node) {
+      return Object.entries(node).map(function ([key, value]) {
+        const children = toArray(value.children);
+
+        const initIndex =
+          value.directory &&
+          children.map(([[c, i]]) => c === "init" && i).find((i) => i);
+
+        const index = value.directory ? initIndex : value.index;
+        return [[path.parse(key).name, ...(index ? [index] : [])], children];
+      });
+    }
+
+    function removeFromArray(array, item) {
+      return array.reduce(function (acc, element) {
+        if (Array.isArray(element)) {
+          if (!(element[0] && element[0].includes(item)))
+            acc.push(removeFromArray(element, item));
+        } else acc.push(element);
+        return acc;
+      }, []);
+    }
+
+    const root = {};
+    const modules = files.map(function (file, index) {
+      const _path = file.split(rootFolder).join("").replace("/", "");
+
+      return {
+        file: _path.startsWith("node_modules/")
+          ? path.resolve(include, _path)
+          : file,
+        path: file,
+        index: index.toString(),
       };
     });
 
-    const tree = this.makeTree(entryNode, names);
-    output.push(stringify.tree(tree));
+    modules
+      .map(({ file, ...args }) => ({
+        file: file
+          .split(folder)
+          .join("")
+          .split("/")
+          .filter((f) => f),
+        ...args,
+      }))
+      .forEach(function ({ file, ...args }) {
+        let current = root;
 
-    const name = names.find((n) => n.module === entryNode)?.name;
-    if (!name) throw new Error("No name for entry node.");
+        file.forEach(function (part) {
+          if (!current[part]) {
+            current[part] = {
+              children: {},
+              directory: !path.extname(part),
+              ...args,
+            };
+          }
 
-    output.push(stringify.footer(name));
-    fs.writeFileSync(_path.resolve(_output), output.join("\n\n"), "utf8");
+          current = current[part].children;
+        });
+      });
+
+    return {
+      modules,
+      tree: removeFromArray(
+        toArray({
+          [path.basename(folder)]: {
+            children: root,
+            directory: true,
+          },
+        }),
+        "init",
+      ),
+    };
+  }
+
+  bundle() {
+    const { input, output } = this.config;
+    const contents = fs.readFileSync(input, "utf8");
+
+    const { modules, tree } = this.createTree([
+      input,
+      ...this.fetchFiles(contents, input),
+    ]);
+
+    const _output = [stringify.polyfill];
+
+    for (const { path: _path, index } of modules) {
+      const extension = path.extname(_path);
+      const transformer = this.getTransformer(extension);
+      if (!transformer) throw new Error(`No transformer for ${extension}.`);
+
+      const contents = fs.readFileSync(_path, "utf8");
+      _output.push(transformer.transform(JSON.stringify(index), contents));
+    }
+
+    _output.push(
+      stringify.tree(tree),
+      stringify.footer(
+        JSON.stringify(modules.find(({ file }) => file === input).index),
+      ),
+    );
+
+    fs.writeFileSync(path.basename(output), _output.join("\n\n"), "utf8");
   }
 }
 
-module.exports = function (path, output) {
-  new Bundler().bundle(path, { output });
+module.exports = function (config) {
+  const bundler = new Bundler(config);
+  bundler.bundle();
 };

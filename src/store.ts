@@ -1,9 +1,9 @@
-import config from "config";
-
 function format(key: string): string {
-  return `${config.Script.Name}.${key}`;
+  return `RobloxAI.${key}`;
 }
 
+function get<T>(key: string, fallback: T): T;
+function get<T>(key: string): T | undefined;
 function get<T>(key: string, fallback?: T): T | undefined {
   const value = getgenv()[format(key)];
 

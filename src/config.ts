@@ -1,4 +1,5 @@
 import { Script, Settings, AI } from ".config.json";
+import store from "store";
 
 interface Script {
   Name: string;
@@ -29,10 +30,8 @@ interface Config {
   AI: AI;
 }
 
-const config: Config = {
+export default store.get<Config>("Config", {
   Script,
   Settings,
   AI,
-};
-
-export default config;
+});
