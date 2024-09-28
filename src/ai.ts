@@ -526,13 +526,13 @@ function createChatCompletion(content: string, name: string) {
       if (args) {
         addMessage({
           role: "assistant",
-          content: `Used ${functionName}. This is automated, do not send messages like this - instead use actual functions.`,
+          content: `Used ${functionName}. This is automated, never send messages like this - use actual functions.`,
         });
 
         log("debug", "AI", `${functionName}, ${httpService.JSONEncode(args)}`);
 
         task.spawn(function () {
-          func.callback(args);
+          func.callback(undefined, args);
         });
       }
     }

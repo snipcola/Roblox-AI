@@ -2,16 +2,25 @@ function format(key: string): string {
   return `RobloxAI.${key}`;
 }
 
+function get<T>(key: string, fallback: T, setFallback: boolean): T;
 function get<T>(key: string, fallback: T): T;
 function get<T>(key: string): T | undefined;
-function get<T>(key: string, fallback?: T): T | undefined {
+function get<T>(
+  key: string,
+  fallback?: T,
+  setFallback?: boolean,
+): T | undefined {
   const value = getgenv()[format(key)];
 
   if (value !== undefined) {
     return value as T;
   }
 
-  return fallback ? set<T>(key, fallback) : undefined;
+  return fallback
+    ? setFallback
+      ? set<T>(key, fallback)
+      : fallback
+    : undefined;
 }
 
 function set<T>(key: string, value: T): T {

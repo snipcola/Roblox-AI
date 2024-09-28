@@ -30,8 +30,12 @@ interface Config {
   AI: AI;
 }
 
-export default store.get<Config>("Config", {
-  Script,
-  Settings,
-  AI,
-});
+export default store.get<Config>(
+  "Config",
+  {
+    Script,
+    Settings,
+    AI,
+  },
+  false,
+);

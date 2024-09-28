@@ -18,9 +18,9 @@ export function isTagged(message: string): boolean {
   return match?.size() > 0;
 }
 
-export function executeCode(code: string) {
+export function executeCode(code: string, logCode?: boolean) {
   const [callback, _error] = loadstring(code);
-  log("debug", "Execute", code);
+  if (logCode) log("debug", "Execute", code);
 
   if (_error) {
     log("error", "Execute", _error);
