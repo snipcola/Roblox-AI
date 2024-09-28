@@ -41,6 +41,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          draft: false
           make_latest: true
           fail_on_unmatched_files: true
           name: 🔄 ${{ steps.version.outputs.current-version }}
