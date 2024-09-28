@@ -7,12 +7,42 @@ class Stringify {
   }
 
   polyfill = this.process(`
-    local __ = { a = nil, b = nil, c = nil }
-    local __require = require
     local __chunks = {}
-    local __cache = {}
     local __scripts = {}
+    local __cache = {}
+
+    local __require = require
     local __http = game:GetService("HttpService")
+
+    local __json = function(str)
+      return function()
+        return __http:JSONDecode(str)
+      end
+    end
+
+    local __tree = function(str)
+      local function parse(tree, parent)
+        local pair, children = tree[1], tree[2]
+        local name, link = pair[1], pair[2]
+        
+        local proxy = Instance.new(link and "ModuleScript" or "Folder")
+        proxy.Parent = parent
+        proxy.Name = name
+        
+        if link then
+          __scripts[proxy] = link
+          __scripts[link] = proxy
+        end
+
+        for _, v in ipairs(children) do
+          parse(v, proxy)
+        end
+
+        return proxy
+      end
+
+      parse(__json(str)())
+    end
 
     local function require(module)
       if typeof(module) == "Instance" then
@@ -23,43 +53,27 @@ class Stringify {
         return __require(module)
       end
 
-      local fn = __chunks[module]
-      if not fn then return end
+      local func = __chunks[module]
+
+      if not func then
+        return
+      end
 
       local cached = __cache[module]
-      if cached then return cached.value end
 
-      local success, result = pcall(fn, __scripts[module])
+      if cached then
+        return cached
+      end
+
+      local success, result = pcall(func, __scripts[module])
+      
       if not success then
         error(result)
         return
       end
 
-      __cache[module] = { value = result }
-      task.wait()
+      __cache[module] = result
       return result
-    end
-
-    __.a = function(str)
-      return function() return __http:JSONDecode(str) end
-    end
-
-    __.c = function (t, parent)
-      local pair, children = unpack(t)
-      local name, link = unpack(pair)
-      local proxy = Instance.new(link and "ModuleScript" or "Folder")
-      proxy.Parent = parent
-      proxy.Name = name
-      if link then
-        __scripts[proxy] = link
-        __scripts[link] = proxy
-      end
-      for _, v in pairs(children) do __.c(v, proxy) end
-      return proxy
-    end
-
-    __.b = function(str)
-      __.c(__.a(str)())
     end
   `);
 
@@ -77,7 +91,7 @@ class Stringify {
 
   json(name, jsonString) {
     return this.process(`
-      __chunks[${name}] = __.a(${this.prepareJSON(JSON.parse(jsonString))})
+      __chunks[${name}] = __json(${this.prepareJSON(JSON.parse(jsonString))})
     `);
   }
 
@@ -87,7 +101,7 @@ class Stringify {
 
   tree(json) {
     return this.process(`
-      __.b(${this.prepareJSON(...json)})
+      __tree(${this.prepareJSON(...json)})
     `);
   }
 

@@ -94,6 +94,11 @@ async function main() {
     process.exit(1);
   }
 
+  function changeSpinner(text, color) {
+    if (text) spinner.text = text;
+    if (color) spinner.color = color;
+  }
+
   if (!darklua) {
     error("Couldn't find 'darklua'");
   }
@@ -111,18 +116,16 @@ async function main() {
     }
 
     try {
-      spinner.text = "Bundling";
-      spinner.color = "yellow";
+      changeSpinner("Bundling", "yellow");
       bundler(config);
     } catch {
       error("Failed to bundle");
     }
 
     try {
-      spinner.text = "Moving Files";
-      spinner.color = "magenta";
-
+      changeSpinner("Moving Files", "magenta");
       clean(config.clean);
+
       fs.mkdirSync(config.folder, { recursive: true });
       fs.renameSync(path.basename(config.output), config.output);
     } catch {
@@ -130,8 +133,7 @@ async function main() {
     }
 
     try {
-      spinner.text = "Minifying";
-      spinner.color = "green";
+      changeSpinner("Minifying", "green");
 
       minifyFile(darklua, config.output);
       fs.cpSync(config.output, config.outputMin, { force: true });
