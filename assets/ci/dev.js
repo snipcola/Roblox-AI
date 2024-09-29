@@ -22,7 +22,7 @@ function watchFolder(folder) {
       if (lock || !path) return;
       lock = true;
 
-      await build();
+      await build(true);
       lock = false;
     });
   });
@@ -46,7 +46,7 @@ async function syncRojo(rojoConfig) {
 }
 
 async function main(config) {
-  await build();
+  await build(true);
   watchFolder(config.folder);
 
   const args = process.argv.splice(2);

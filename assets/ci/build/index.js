@@ -59,7 +59,7 @@ const config = {
   nodeModules: path.resolve(root, "node_modules"),
 };
 
-async function main() {
+async function main(dev) {
   const { default: yocto } = await import("yocto-spinner");
   const spinner = yocto({ text: "Building", color: "blue" }).start();
   const darklua = await getDarklua();
@@ -67,7 +67,7 @@ async function main() {
   async function error(...args) {
     spinner.error(...args);
     await clean(config.clean);
-    process.exit(1);
+    if (!dev) process.exit(1);
   }
 
   function changeSpinner(text, color) {
@@ -77,6 +77,7 @@ async function main() {
 
   if (!darklua) {
     await error("Couldn't find 'darklua'");
+    return;
   }
 
   const elapsed = await measure(async function () {
@@ -89,6 +90,7 @@ async function main() {
       });
     } catch {
       await error("Failed to build");
+      return;
     }
 
     try {
@@ -96,6 +98,7 @@ async function main() {
       await bundler(config);
     } catch {
       await error("Failed to bundle");
+      return;
     }
 
     try {
@@ -106,6 +109,7 @@ async function main() {
       await fs.rename(path.basename(config.output), config.output);
     } catch {
       await error("Failed to move files");
+      return;
     }
 
     try {
@@ -119,6 +123,7 @@ async function main() {
       await minifyFile(darklua, config.outputMin);
     } catch {
       await error("Failed to minify");
+      return;
     }
   });
 
