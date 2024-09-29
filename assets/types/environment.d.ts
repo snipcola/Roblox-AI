@@ -4,56 +4,56 @@
  * Extends the behavior of a normal RBXScriptConnection.
  */
 interface MockConnection {
-	/**
-	 * Whether the connection can fire.
-	 */
-	readonly Enabled: boolean;
+  /**
+   * Whether the connection can fire.
+   */
+  readonly Enabled: boolean;
 
-	/**
-	 * True when connected to a foreign state (i.e. core scripts).
-	 */
-	readonly ForeignState: boolean;
+  /**
+   * True when connected to a foreign state (i.e. core scripts).
+   */
+  readonly ForeignState: boolean;
 
-	/**
-	 * True if the connection was created in Luau/
-	 */
-	readonly LuaConnection: boolean;
+  /**
+   * True if the connection was created in Luau/
+   */
+  readonly LuaConnection: boolean;
 
-	/**
-	 * The function bound to this connection. Nil when `ForeignState` is true.
-	 */
-	readonly Function?: Callback;
+  /**
+   * The function bound to this connection. Nil when `ForeignState` is true.
+   */
+  readonly Function?: Callback;
 
-	/**
-	 * The thread bound to this connection. Nil when `ForeignState` is true.
-	 */
-	readonly Thread?: thread;
+  /**
+   * The thread bound to this connection. Nil when `ForeignState` is true.
+   */
+  readonly Thread?: thread;
 
-	/**
-	 * Fires the signal with the given arguments.
-	 */
-	Fire(this: MockConnection, ...args: unknown[]): void;
+  /**
+   * Fires the signal with the given arguments.
+   */
+  Fire(this: MockConnection, ...args: unknown[]): void;
 
-	/**
-	 * Defers the signal with the given arguments.
-	 * For more info regarding defered events, see: https://devforum.roblox.com/t/beta-deferred-lua-event-handling/1240569
-	 */
-	Defer(this: MockConnection, ...args: unknown[]): void;
+  /**
+   * Defers the signal with the given arguments.
+   * For more info regarding defered events, see: https://devforum.roblox.com/t/beta-deferred-lua-event-handling/1240569
+   */
+  Defer(this: MockConnection, ...args: unknown[]): void;
 
-	/**
-	 * Disconnects the connection.
-	 */
-	Disconnect(this: MockConnection): void;
+  /**
+   * Disconnects the connection.
+   */
+  Disconnect(this: MockConnection): void;
 
-	/**
-	 * Prevents the connection from firing.
-	 */
-	Disable(this: MockConnection): void;
+  /**
+   * Prevents the connection from firing.
+   */
+  Disable(this: MockConnection): void;
 
-	/**
-	 * Allows the connection to fire if it was previously disabled.
-	 */
-	Enable(this: MockConnection): void;
+  /**
+   * Allows the connection to fire if it was previously disabled.
+   */
+  Enable(this: MockConnection): void;
 }
 
 /**
@@ -66,15 +66,19 @@ interface MockConnection {
  * 	connection.Disable();
  * }
  */
-declare function getconnections(signal: RBXScriptSignal): readonly MockConnection[];
+declare function getconnections(
+  signal: RBXScriptSignal,
+): readonly MockConnection[];
 
 /**
  * Returns the garbage collection object.
  * @param includeTables Whether to include tables in the GC.
  */
 declare function getgc<T extends boolean>(
-	includeTables: T,
-): T extends true ? readonly (Callback | Instance)[] : readonly (Callback | Instance | object)[];
+  includeTables: T,
+): T extends true
+  ? readonly (Callback | Instance)[]
+  : readonly (Callback | Instance | object)[];
 /**
  * Returns the garbage collection object.
  * @param includeTables Whether to include tables in the GC.
@@ -120,14 +124,18 @@ declare function getinstances(): readonly Instance[];
  * @param filterCoreScripts Whether to filter core scripts.
  * @returns A list of ModuleScripts.
  */
-declare function getloadedmodules(filterCoreScripts?: boolean): readonly ModuleScript[];
+declare function getloadedmodules(
+  filterCoreScripts?: boolean,
+): readonly ModuleScript[];
 
 /**
  * Like `getinstances`, but returns only instances that are not descendants of
  * another instance.
  * @returns A list of instances.
  */
-declare function getnilinstances(): readonly (Instance & { Parent: undefined })[];
+declare function getnilinstances(): readonly (Instance & {
+  Parent: undefined;
+})[];
 
 /**
  * Returns the global game environment.
@@ -200,7 +208,11 @@ declare function isscriptable(object: Instance, property: string): boolean;
  * @param value The value to set the property to.
  * @returns Whether the property was hidden.
  */
-declare function sethiddenproperty(instance: Instance, property: string, value: unknown): boolean;
+declare function sethiddenproperty(
+  instance: Instance,
+  property: string,
+  value: unknown,
+): boolean;
 
 /**
  * Sets the current thread identity to `identity`.
@@ -222,4 +234,8 @@ declare const setthreadidentity: typeof setidentity | undefined;
  * @param value Whether the property is Scriptable.
  * @returns The original Scriptable status.
  */
-declare function setscriptable(object: Instance, property: string, value: boolean): boolean;
+declare function setscriptable(
+  object: Instance,
+  property: string,
+  value: boolean,
+): boolean;

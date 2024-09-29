@@ -7,7 +7,7 @@ const localPlayer = players.LocalPlayer;
 
 export function waitForGameLoad() {
   log("debug", "Script", "Waiting for game load");
-  game.IsLoaded() || game.Loaded.Wait();
+  if (!game.IsLoaded()) game.Loaded.Wait();
 }
 
 export function isLocalPlayer(player: Player): boolean {
@@ -119,7 +119,7 @@ interface Header {
   Value: string;
 }
 
-type Headers = Header[];
+type Headers = Array<Header>;
 
 export interface HttpResponse {
   Success: boolean;

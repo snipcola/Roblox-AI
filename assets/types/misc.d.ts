@@ -57,7 +57,11 @@ declare function lz4decompress(string: string, size: number): string;
  * @param flags The flag integer.
  * @returns The user input integer.
  */
-declare function messagebox(text: string, caption: string, flags: number): number;
+declare function messagebox(
+  text: string,
+  caption: string,
+  flags: number,
+): number;
 
 /**
  * Queues the given script to execute after a successful TeleportService

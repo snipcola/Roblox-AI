@@ -26,7 +26,7 @@ async function main() {
 }
 
 async function measureMain() {
-  console.log("- Cleaning...");
+  console.log("- Cleaning");
   console.log(`\u2714 Cleaned (took ${await measure(main)}ms)`);
 }
 

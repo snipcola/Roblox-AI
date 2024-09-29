@@ -13,7 +13,8 @@
     "strict": true,
     "target": "ESNext",
     "typeRoots": [
-      "node_modules/@rbxts"
+      "node_modules/@rbxts",
+      "assets/types"
     ],
     "rootDir": "src",
     "outDir": "out",

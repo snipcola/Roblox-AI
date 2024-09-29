@@ -44,7 +44,7 @@ chat.onMessage(function (message, speaker) {
     });
   }
 
-  log("debug", "Message", `${speaker.Name}: \"${message}\"`);
+  log("debug", "Message", `${speaker.Name}: "${message}"`);
   ai.createChatCompletion(message, speaker.Name);
 });
 

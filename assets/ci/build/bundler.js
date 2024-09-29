@@ -11,7 +11,7 @@ async function fileExists(file) {
 }
 
 const windows = process.platform === "win32";
-const seperator = windows ? "\\" : "/";
+const separator = windows ? "\\" : "/";
 
 class Stringify {
   process(lua) {
@@ -196,7 +196,7 @@ class Bundler {
       return {
         path: path.resolve(
           filePath,
-          [...scriptToPath(context.split(".")), ...args].join(seperator),
+          [...scriptToPath(context.split(".")), ...args].join(separator),
         ),
         args: forceArgs || args,
       };
@@ -238,11 +238,11 @@ class Bundler {
       if (
         typeof args === "object" &&
         args
-          .join(seperator)
-          .startsWith(`include${seperator}node_modules${seperator}`)
+          .join(separator)
+          .startsWith(`include${separator}node_modules${separator}`)
       ) {
         result = await tryGetPath(
-          path.resolve(nodeModules, args.splice(2).join(seperator)),
+          path.resolve(nodeModules, args.splice(2).join(separator)),
         );
       } else if (
         typeof args === "string" &&
@@ -320,10 +320,10 @@ class Bundler {
 
     const root = {};
     const modules = files.map(function (file, index) {
-      const _path = file.split(rootFolder).join("").replace(seperator, "");
+      const _path = file.split(rootFolder).join("").replace(separator, "");
 
       return {
-        file: _path.startsWith(`node_modules${seperator}`)
+        file: _path.startsWith(`node_modules${separator}`)
           ? path.resolve(include, _path)
           : file,
         path: file,
@@ -335,7 +335,7 @@ class Bundler {
       file: file
         .split(folder)
         .join("")
-        .split(seperator)
+        .split(separator)
         .filter((f) => f),
       ...args,
     }));

@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   release:
-    name: Create Release
+    name: Build, Bundle, & Release
     runs-on: ubuntu-latest
 
     steps:
@@ -28,8 +28,11 @@ jobs:
         with:
           version: v0.3.0
 
-      - name: Install Darklua
+      - name: Install Aftman Dependencies
         run: aftman install --no-trust-check
+
+      - name: ESLint Check
+        run: pnpm run lint
 
       - name: Build & Bundle
         run: pnpm run build
@@ -39,17 +42,14 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@v1.3.1
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: ncipollo/release-action@v1.14.0
         with:
           draft: false
-          make_latest: true
-          fail_on_unmatched_files: true
-          name: 🔄 ${{ steps.version.outputs.current-version }}
-          tag_name: ${{ steps.version.outputs.current-version }}
-          body: |
-            📦 This is an automated release.
-            - 📄 The compiled script is attached (`script.lua`).
-            - 🔎 There is also a minified variation (`script.min.lua`).
-          files: |
-            out/script.lua
-            out/script.min.lua
+          makeLatest: true
+          allowUpdates: true
+          replacesArtifacts: true
+          omitBody: true
+          generateReleaseNotes: true
+          name: 📦 Release ${{ steps.version.outputs.current-version }}
+          tag: ${{ steps.version.outputs.current-version }}
+          artifacts: "out/*.lua"

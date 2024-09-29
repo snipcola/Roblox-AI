@@ -1,8 +1,8 @@
 // https://github.com/unified-naming-convention/NamingStandard/tree/main/api/metatable
 
 type LuaMetatableFull<T> = LuaMetatable<T> & {
-	__type?: string;
-	__namecall?: (self: T, ...args: Array<unknown>) => void;
+  __type?: string;
+  __namecall?: (self: T, ...args: Array<unknown>) => void;
 };
 
 /**
@@ -32,9 +32,9 @@ declare function getrawmetatable<T>(object: T): LuaMetatableFull<T>;
  * });
  */
 declare function hookmetamethod<T, K extends keyof LuaMetatableFull<T>>(
-	object: T,
-	metamethod: K,
-	stub: Required<LuaMetatableFull<T>>[K],
+  object: T,
+  metamethod: K,
+  stub: Required<LuaMetatableFull<T>>[K],
 ): Required<LuaMetatableFull<T>>[K];
 
 /**
@@ -60,7 +60,10 @@ declare function isreadonly(object: unknown): boolean;
  * 	__newindex: metatable.__newindex,
  * });
  */
-declare function setrawmetatable<T>(object: T, metatable: LuaMetatableFull<T>): void;
+declare function setrawmetatable<T>(
+  object: T,
+  metatable: LuaMetatableFull<T>,
+): void;
 
 /**
  * Sets whether `object` is frozen or read-only.

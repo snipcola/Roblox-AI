@@ -4,34 +4,34 @@
  * Handles references to Roblox instances in the cache.
  */
 declare namespace cache {
-	/**
-	 * Invalidates `object` in the instance cache.
-	 * @param object The Roblox instance to invalidate.
-	 * @example
-	 * const Workspace = game.GetService("Workspace");
-	 * cache.invalidate(game.GetService("Workspace"));
-	 * print(Workspace, Workspace === game.GetService("Workspace")); // Workspace, false
-	 */
-	function invalidate(object: Instance): void;
+  /**
+   * Invalidates `object` in the instance cache.
+   * @param object The Roblox instance to invalidate.
+   * @example
+   * const Workspace = game.GetService("Workspace");
+   * cache.invalidate(game.GetService("Workspace"));
+   * print(Workspace, Workspace === game.GetService("Workspace")); // Workspace, false
+   */
+  function invalidate(object: Instance): void;
 
-	/**
-	 * Checks whether `object` exists in the instance cache.
-	 * @param object The Roblox instance to check.
-	 * @returns Whether `object` exists in the instance cache.
-	 */
-	function iscached(object: Instance): boolean;
+  /**
+   * Checks whether `object` exists in the instance cache.
+   * @param object The Roblox instance to check.
+   * @returns Whether `object` exists in the instance cache.
+   */
+  function iscached(object: Instance): boolean;
 
-	/**
-	 * Replaces `object` with `replacement` in the instance cache.
-	 * @param object The Roblox instance to replace.
-	 * @param replacement The replacement instance.
-	 * @example
-	 * // The cached instance for Workspace is now Players.
-	 * // Every time Workspace is accessed from the cache, it will receive Players.
-	 * cache.replace(game.GetService("Workspace"), game.GetService("Players"));
-	 * print(game.GetService("Workspace")); // Players
-	 */
-	function replace(object: Instance, replacement: Instance): void;
+  /**
+   * Replaces `object` with `replacement` in the instance cache.
+   * @param object The Roblox instance to replace.
+   * @param replacement The replacement instance.
+   * @example
+   * // The cached instance for Workspace is now Players.
+   * // Every time Workspace is accessed from the cache, it will receive Players.
+   * cache.replace(game.GetService("Workspace"), game.GetService("Players"));
+   * print(game.GetService("Workspace")); // Players
+   */
+  function replace(object: Instance, replacement: Instance): void;
 }
 
 /**

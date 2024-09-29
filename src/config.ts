@@ -3,23 +3,23 @@ import store from "store";
 
 interface Script {
   Name: string;
-  Whitelist: string[];
-  Blacklist: string[];
+  Whitelist: Array<string>;
+  Blacklist: Array<string>;
   Debug: boolean;
 }
 
 interface Settings {
   AntiAFK: boolean;
-  MinimumDistance: number | null;
-  MessageProcessDelay: number | null;
+  MinimumDistance: number | undefined;
+  MessageProcessDelay: number | undefined;
 }
 
 interface AI {
   Prompt: string;
   Model: string;
-  EnabledFunctions: string[];
-  MaximumCharacterLimit: number | null;
-  MaximumMessageContext: number | null;
+  EnabledFunctions: Array<string>;
+  MaximumCharacterLimit: number | undefined;
+  MaximumMessageContext: number | undefined;
   Api: string;
   Key: string;
 }

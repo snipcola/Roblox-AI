@@ -29,17 +29,17 @@ interface ToolCall {
   function: ToolCallFunction;
 }
 
-type ToolCalls = ToolCall[];
+type ToolCalls = Array<ToolCall>;
 
 interface Message {
   role: Role;
-  content: string | null;
+  content: string | undefined;
   name?: string;
-  refusal?: string | null;
+  refusal?: string | undefined;
   tool_calls?: ToolCalls;
 }
 
-type Messages = Message[];
+type Messages = Array<Message>;
 
 type ToolType = "function";
 
@@ -55,7 +55,7 @@ interface Tool {
   function: Function;
 }
 
-type Tools = Tool[];
+type Tools = Array<Tool>;
 
 type ToolChoiceString = "none" | "auto" | "required";
 
@@ -82,7 +82,7 @@ interface Choice {
   finish_reason: string;
 }
 
-type Choices = Choice[];
+type Choices = Array<Choice>;
 
 interface CompletionTokensDetails {
   reasoning_tokens: number;
@@ -103,7 +103,7 @@ interface Response {
   system_fingerprint: string;
   choices: Choices;
   usage: Usage;
-  service_tier: string | null;
+  service_tier: string | undefined;
 }
 
 interface AvailableFunction {
@@ -111,7 +111,7 @@ interface AvailableFunction {
   callback: Callback;
 }
 
-type AvailableFunctions = AvailableFunction[];
+type AvailableFunctions = Array<AvailableFunction>;
 
 const systemMessages: Messages = [
   {

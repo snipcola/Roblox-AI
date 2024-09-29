@@ -11,9 +11,13 @@
  * fireclickdetector(clickDetector, 50, "MouseClick");
  */
 declare function fireclickdetector(
-	detector: ClickDetector,
-	distance?: number,
-	event?: "MouseClick" | "RightMouseClick" | "MouseHoverEnter" | "MouseHoverLeave",
+  detector: ClickDetector,
+  distance?: number,
+  event?:
+    | "MouseClick"
+    | "RightMouseClick"
+    | "MouseHoverEnter"
+    | "MouseHoverLeave",
 ): void;
 
 /**
@@ -28,7 +32,10 @@ declare function fireclickdetector(
  * print(remote.OnClientInvoke()); // Throws an error
  * print(getcallbackvalue(remote, "OnClientInvoke")!()); // Prints "Hello, world!"
  */
-declare function getcallbackvalue<T extends Instance, K extends keyof T>(object: T, property: K): T[K];
+declare function getcallbackvalue<T extends Instance, K extends keyof T>(
+  object: T,
+  property: K,
+): T[K];
 /**
  * @alias getcallbackvalue
  * @hidden
@@ -41,7 +48,9 @@ declare const getcallbackmember: typeof getcallbackvalue | undefined;
  * @param object The union to get the physical config data from.
  * @returns The content and hash string.
  */
-declare function getphysicalconfigdata(object: UnionOperation): LuaTuple<[string, string]>;
+declare function getphysicalconfigdata(
+  object: UnionOperation,
+): LuaTuple<[string, string]>;
 
 /**
  * Sets Roblox Studio's clipboard to the given model data. This allows data

@@ -3,30 +3,30 @@
 // Drawing library
 
 interface Drawings {
-	Line: DrawingLine;
-	Text: DrawingText;
-	Image: DrawingImage;
-	Circle: DrawingCircle;
-	Square: DrawingSquare;
-	Quad: DrawingQuad;
-	Triangle: DrawingTriangle;
+  Line: DrawingLine;
+  Text: DrawingText;
+  Image: DrawingImage;
+  Circle: DrawingCircle;
+  Square: DrawingSquare;
+  Quad: DrawingQuad;
+  Triangle: DrawingTriangle;
 }
 
 interface DrawingConstructor {
-	/**
-	 * Creates a new drawing of type `drawingType`.
-	 */
-	new <T extends keyof Drawings>(drawingType: T): Drawings[T];
+  /**
+   * Creates a new drawing of type `drawingType`.
+   */
+  new <T extends keyof Drawings>(drawingType: T): Drawings[T];
 
-	/**
-	 * Maps the supported font styles to numbers.
-	 */
-	readonly Fonts: {
-		UI: 0;
-		System: 1;
-		Plex: 2;
-		Monospace: 3;
-	};
+  /**
+   * Maps the supported font styles to numbers.
+   */
+  readonly Fonts: {
+    UI: 0;
+    System: 1;
+    Plex: 2;
+    Monospace: 3;
+  };
 }
 
 /**
@@ -47,47 +47,47 @@ declare const Drawing: DrawingConstructor;
  * The base class for all drawings. Cannot be instantiated directly.
  */
 interface Drawing {
-	Visible: boolean;
-	ZIndex: number;
-	Transparency: number;
-	Color: Color3;
-	Destroy(): void;
+  Visible: boolean;
+  ZIndex: number;
+  Transparency: number;
+  Color: Color3;
+  Destroy(): void;
 
-	/** @deprecated */
-	Remove(): void;
+  /** @deprecated */
+  Remove(): void;
 }
 
 /**
  * Draws a line from `From` to `To`.
  */
 interface DrawingLine extends Drawing {
-	Thickness: number;
-	From: Vector2;
-	To: Vector2;
+  Thickness: number;
+  From: Vector2;
+  To: Vector2;
 }
 
 /**
  * Renders text to the screen.
  */
 interface DrawingText extends Drawing {
-	Text: string;
-	readonly TextBounds: Vector2;
-	Size: number;
-	Center: boolean;
-	Outline: boolean;
-	OutlineColor: Color3;
-	Position: Vector2;
-	Font: number;
+  Text: string;
+  readonly TextBounds: Vector2;
+  Size: number;
+  Center: boolean;
+  Outline: boolean;
+  OutlineColor: Color3;
+  Position: Vector2;
+  Font: number;
 }
 
 /**
  * Renders an image to the screen. Set `Data` to the image data, **not a URL!**
  */
 interface DrawingImage extends Drawing {
-	Data: string;
-	Size: Vector2;
-	Position: Vector2;
-	Rounding: number;
+  Data: string;
+  Size: Vector2;
+  Position: Vector2;
+  Rounding: number;
 }
 
 /**
@@ -97,44 +97,44 @@ interface DrawingImage extends Drawing {
  * greater the performance hit.
  */
 interface DrawingCircle extends Drawing {
-	Thickness: number;
-	NumSides: number;
-	Radius: number;
-	Filled: boolean;
-	Position: Vector2;
+  Thickness: number;
+  NumSides: number;
+  Radius: number;
+  Filled: boolean;
+  Position: Vector2;
 }
 
 /**
  * Draws a square starting at `Position` and ending at `Position + Size`.
  */
 interface DrawingSquare extends Drawing {
-	Thickness: number;
-	Size: Vector2;
-	Position: Vector2;
-	Filled: boolean;
+  Thickness: number;
+  Size: Vector2;
+  Position: Vector2;
+  Filled: boolean;
 }
 
 /**
  * Draws a quadrilateral with the given points.
  */
 interface DrawingQuad extends Drawing {
-	Thickness: number;
-	PointA: Vector2;
-	PointB: Vector2;
-	PointC: Vector2;
-	PointD: Vector2;
-	Filled: boolean;
+  Thickness: number;
+  PointA: Vector2;
+  PointB: Vector2;
+  PointC: Vector2;
+  PointD: Vector2;
+  Filled: boolean;
 }
 
 /**
  * Draws a triangle with the given points.
  */
 interface DrawingTriangle extends Drawing {
-	Thickness: number;
-	PointA: Vector2;
-	PointB: Vector2;
-	PointC: Vector2;
-	Filled: boolean;
+  Thickness: number;
+  PointA: Vector2;
+  PointB: Vector2;
+  PointC: Vector2;
+  Filled: boolean;
 }
 
 // Drawing functions
@@ -153,7 +153,10 @@ declare function cleardrawcache(): void;
  * const circle = new Drawing("Circle");
  * getrenderproperty(circle, "Position"); // Vector2
  */
-declare function getrenderproperty<T extends Drawing, K extends keyof T>(drawing: T, property: K): T[K];
+declare function getrenderproperty<T extends Drawing, K extends keyof T>(
+  drawing: T,
+  property: K,
+): T[K];
 
 /**
  * Returns whether `object` is a valid Drawing.
@@ -171,4 +174,8 @@ declare function isrenderobj(object: unknown): object is Drawing;
  * const circle = new Drawing("Circle");
  * setrenderproperty(circle, "Position", new Vector2());
  */
-declare function setrenderproperty<T extends Drawing, K extends keyof T>(drawing: T, property: K, value: T[K]): void;
+declare function setrenderproperty<T extends Drawing, K extends keyof T>(
+  drawing: T,
+  property: K,
+  value: T[K],
+): void;
