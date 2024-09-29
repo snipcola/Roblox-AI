@@ -1,7 +1,7 @@
 {
   "name": "roblox-ai",
   "author": "Snipcola",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "type": "commonjs",
   "scripts": {
     "build": "node assets/ci/build",
@@ -9,7 +9,7 @@
     "clean": "node assets/ci/clean",
     "release": "git push origin main:release --force",
     "lint": "eslint --fix src",
-    "format": "prettier --write 'src/**/*'"
+    "format": "prettier --write \"src/**/*\""
   },
   "devDependencies": {
     "@file/types": "file:assets/types",

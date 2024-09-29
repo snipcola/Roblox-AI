@@ -21,7 +21,6 @@
     "plugin:roblox-ts/recommended",
   ],
   "rules": {
-    "prettier/prettier": "warn",
     "@typescript-eslint/array-type": [
       "warn",
       {
@@ -34,6 +33,7 @@
     "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-empty-function": "warn",
+    "prettier/prettier": "off",
     "roblox-ts/lua-truthiness": "off",
     "prefer-const": [
       "warn",
