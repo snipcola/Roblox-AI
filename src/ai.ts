@@ -1,6 +1,8 @@
 import chat from "chat";
 import config from "config";
 import {
+  HttpResponse,
+  sendRequest,
   getPlayerFromPartialName,
   getPlayerHumanoid,
   getPlayerPrimaryPart,
@@ -471,26 +473,24 @@ function createChatCompletion(content: string, name: string) {
 
   log("debug", "AI", "Sent request");
 
-  const { Success, Body } = request({
-    Url: config.AI.Api,
-    Method: "POST",
-    Headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.AI.Key}`,
-    },
-    Body: httpService.JSONEncode(data),
-  });
+  let response: HttpResponse | Response | undefined = sendRequest(
+    config.AI.Api,
+    "POST",
+    [
+      { Name: "Content-Type", Value: "application/json" },
+      { Name: "Authorization", Value: `Bearer ${config.AI.Key}` },
+    ],
+    data,
+  );
 
-  if (Success === false) {
+  if (!response || response.Success === false) {
     failedChatCompletion();
     log("error", "AI", "Request not successful");
     return;
   }
 
-  let response;
-
   try {
-    response = httpService.JSONDecode(Body) as Response;
+    response = httpService.JSONDecode(response.Body) as Response;
   } catch {
     failedChatCompletion();
     log("error", "AI", "Failed to parse response");

@@ -1,34 +1,33 @@
-const fs = require("fs");
 const process = require("process");
+const path = require("path");
+const { measure, clean } = require("./shared/functions");
 
-const { measure } = require("./shared/functions");
-
-function clean(folders) {
-  for (const folder of folders) {
-    fs.rmSync(folder, { recursive: true, force: true });
-  }
-}
+const root = path.resolve(__dirname, "..", "..");
 
 const config = {
   clean: [
-    "out",
-    "script.lua",
-    "node_modules",
-    "pnpm-lock.yaml",
-    "package-lock.json",
-    "yarn.lock",
-    ".DS_Store",
+    path.resolve(root, "out"),
+    path.resolve(root, "script.lua"),
+    path.resolve(root, "node_modules"),
+    path.resolve(root, "pnpm-lock.yaml"),
+    path.resolve(root, "package-lock.json"),
+    path.resolve(root, "yarn.lock"),
+    path.resolve(root, ".DS_Store"),
   ],
 };
 
-function main() {
+async function main() {
   try {
-    clean(config.clean);
+    await clean(config.clean);
   } catch {
-    console.error("Failed to clean");
+    console.error("\u2716 Failed to clean");
     process.exit(1);
   }
 }
 
-console.log("Cleaning...");
-console.log(`Cleaned (took ${measure(main)}ms)`);
+async function measureMain() {
+  console.log("- Cleaning...");
+  console.log(`\u2714 Cleaned (took ${await measure(main)}ms)`);
+}
+
+measureMain();

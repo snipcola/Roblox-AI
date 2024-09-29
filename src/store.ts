@@ -2,6 +2,13 @@ function format(key: string): string {
   return `RobloxAI.${key}`;
 }
 
+type Store = Record<string, unknown>;
+const localStore: Store = {};
+
+function store(): Store {
+  return getgenv ? getgenv() : localStore;
+}
+
 function get<T>(key: string, fallback: T, setFallback: boolean): T;
 function get<T>(key: string, fallback: T): T;
 function get<T>(key: string): T | undefined;
@@ -10,7 +17,7 @@ function get<T>(
   fallback?: T,
   setFallback?: boolean,
 ): T | undefined {
-  const value = getgenv()[format(key)];
+  const value = store()[format(key)];
 
   if (value !== undefined) {
     return value as T;
@@ -24,7 +31,7 @@ function get<T>(
 }
 
 function set<T>(key: string, value: T): T {
-  getgenv()[format(key)] = value;
+  store()[format(key)] = value;
   return value as T;
 }
 

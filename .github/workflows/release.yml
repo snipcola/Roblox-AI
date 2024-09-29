@@ -48,8 +48,8 @@ jobs:
           tag_name: ${{ steps.version.outputs.current-version }}
           body: |
             📦 This is an automated release.
-            - 📄 The compiled script is attached.
-            - 🔎 There is also a minified variation.
+            - 📄 The compiled script is attached (`script.lua`).
+            - 🔎 There is also a minified variation (`script.min.lua`).
           files: |
             out/script.lua
             out/script.min.lua

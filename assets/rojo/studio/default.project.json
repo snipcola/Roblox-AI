@@ -1,0 +1,15 @@
+{
+  "name": "roblox-ai",
+  "tree": {
+    "$className": "DataModel",
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "Script": {
+          "$path": "script.client.lua"
+        }
+      }
+    }
+  }
+}

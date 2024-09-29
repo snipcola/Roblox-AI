@@ -1,5 +1,14 @@
-const fs = require("fs");
+const fs = require("fs/promises");
 const path = require("path");
+
+async function fileExists(file) {
+  try {
+    await fs.access(file);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 class Stringify {
   process(lua) {
@@ -156,7 +165,7 @@ class Bundler {
     });
   }
 
-  fetchFiles(contents, filePath, attemptedPaths) {
+  async fetchFiles(contents, filePath, attemptedPaths) {
     if (attemptedPaths?.has(filePath)) {
       return new Set();
     }
@@ -190,14 +199,14 @@ class Bundler {
       };
     }
 
-    function getPath({ path: _path, args }) {
+    async function getPath({ path: _path, args }) {
       if (!_path) return;
 
-      function tryGetPath(_path) {
+      async function tryGetPath(_path) {
         try {
           const extensions = ["lua", "luau", "json", "txt"];
           const isDirectory =
-            fs.existsSync(_path) && fs.statSync(_path).isDirectory();
+            (await fileExists(_path)) && (await fs.stat(_path)).isDirectory();
 
           const paths = isDirectory
             ? extensions.map((e) => path.resolve(_path, `init.${e}`))
@@ -205,47 +214,51 @@ class Bundler {
               ? [_path]
               : extensions.map((e) => `${_path}.${e}`);
 
-          for (const _path of paths) {
-            if (
-              fs.existsSync(_path) &&
-              extensions.some((e) => _path.endsWith(`.${e}`))
-            ) {
-              return _path;
-            }
-          }
+          const files = await Promise.all(
+            paths.map(async (_path) => {
+              if (
+                (await fileExists(_path)) &&
+                extensions.some((e) => _path.endsWith(`.${e}`))
+              ) {
+                return _path;
+              }
+            }),
+          );
+
+          return files.find((f) => f !== undefined);
         } catch {}
       }
 
-      let result = tryGetPath(_path);
+      let result = await tryGetPath(_path);
       if (result) return result;
 
       if (
         typeof args === "object" &&
         args.join("/").startsWith("include/node_modules/")
       ) {
-        result = tryGetPath(
+        result = await tryGetPath(
           path.resolve(nodeModules, args.splice(2).join("/")),
         );
       } else if (
         typeof args === "string" &&
         args.split(".").splice(-2, 1).join() === "include"
       ) {
-        result = tryGetPath(path.resolve(include, args.split(".").pop()));
+        result = await tryGetPath(path.resolve(include, args.split(".").pop()));
       }
 
       if (result) return result;
     }
 
-    const processPath = (_path) => {
+    const processPath = async (_path) => {
       if (!_path || paths.has(_path) || _path === filePath) return;
 
-      const contents = fs.readFileSync(_path, "utf8");
+      const contents = await fs.readFile(_path, "utf8");
       if (!contents) return;
 
       paths.add(_path);
       paths = new Set([
         ...paths,
-        ...this.fetchFiles(contents, _path, attemptedPaths),
+        ...(await this.fetchFiles(contents, _path, attemptedPaths)),
       ]);
     };
 
@@ -264,11 +277,11 @@ class Bundler {
         match[1].split(",").map((arg) => arg.trim().replace(/^"|"$/g, ""));
       args.shift();
 
-      processPath(getPath(toPath(args)));
+      await processPath(await getPath(toPath(args)));
     }
 
     while ((match = requireRegex.exec(contents)) !== null) {
-      processPath(getPath(toPath([match[1]], match[1])));
+      await processPath(await getPath(toPath([match[1]], match[1])));
     }
 
     return paths;
@@ -313,30 +326,30 @@ class Bundler {
       };
     });
 
-    modules
-      .map(({ file, ...args }) => ({
-        file: file
-          .split(folder)
-          .join("")
-          .split("/")
-          .filter((f) => f),
-        ...args,
-      }))
-      .forEach(function ({ file, ...args }) {
-        let current = root;
+    const filteredModules = modules.map(({ file, ...args }) => ({
+      file: file
+        .split(folder)
+        .join("")
+        .split("/")
+        .filter((f) => f),
+      ...args,
+    }));
 
-        file.forEach(function (part) {
-          if (!current[part]) {
-            current[part] = {
-              children: {},
-              directory: !path.extname(part),
-              ...args,
-            };
-          }
+    for (const { file, ...args } of filteredModules) {
+      let current = root;
 
-          current = current[part].children;
-        });
-      });
+      for (const part of file) {
+        if (!current[part]) {
+          current[part] = {
+            children: {},
+            directory: !path.extname(part),
+            ...args,
+          };
+        }
+
+        current = current[part].children;
+      }
+    }
 
     return {
       modules,
@@ -352,25 +365,27 @@ class Bundler {
     };
   }
 
-  bundle() {
+  async bundle() {
     const { input, output } = this.config;
-    const contents = fs.readFileSync(input, "utf8");
+    const contents = await fs.readFile(input, "utf8");
 
     const { modules, tree } = this.createTree([
       input,
-      ...this.fetchFiles(contents, input),
+      ...(await this.fetchFiles(contents, input)),
     ]);
 
     const _output = [stringify.polyfill];
 
-    for (const { path: _path, index } of modules) {
-      const extension = path.extname(_path);
-      const transformer = this.getTransformer(extension);
-      if (!transformer) throw new Error(`No transformer for ${extension}.`);
+    await Promise.all(
+      modules.map(async ({ path: _path, index }) => {
+        const extension = path.extname(_path);
+        const transformer = this.getTransformer(extension);
+        if (!transformer) throw new Error(`No transformer for ${extension}.`);
 
-      const contents = fs.readFileSync(_path, "utf8");
-      _output.push(transformer.transform(JSON.stringify(index), contents));
-    }
+        const contents = await fs.readFile(_path, "utf8");
+        _output.push(transformer.transform(JSON.stringify(index), contents));
+      }),
+    );
 
     _output.push(
       stringify.tree(tree),
@@ -379,11 +394,11 @@ class Bundler {
       ),
     );
 
-    fs.writeFileSync(path.basename(output), _output.join("\n\n"), "utf8");
+    await fs.writeFile(path.basename(output), _output.join("\n\n"), "utf8");
   }
 }
 
-module.exports = function (config) {
+module.exports = async function (config) {
   const bundler = new Bundler(config);
-  bundler.bundle();
+  await bundler.bundle();
 };

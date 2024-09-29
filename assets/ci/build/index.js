@@ -1,48 +1,22 @@
 const os = require("os");
-const fs = require("fs");
+const fs = require("fs/promises");
 
 const path = require("path");
 const process = require("process");
 
-const { spawnSync } = require("child_process");
 const { lookpath } = require("lookpath");
+const { executeCommand, measure, clean } = require("../shared/functions");
 
 const build = require("roblox-ts/out/CLI/commands/build");
-const { measure } = require("../shared/functions");
 const bundler = require("./bundler");
-
-function clean(folders) {
-  for (const folder of folders) {
-    fs.rmSync(folder, { recursive: true, force: true });
-  }
-}
-
-function executeCommand(command, args, cwd) {
-  const useCMD =
-    process.platform === "win32" && !command?.toLowerCase()?.endsWith(".exe");
-  const result = spawnSync(
-    useCMD ? "cmd.exe" : command,
-    useCMD ? ["/c", command, ...args] : args,
-    {
-      cwd,
-      stdio: ["ignore", "pipe", "pipe"],
-    },
-  );
-
-  return {
-    success: result.error === undefined,
-    output: result.stdout.toString(),
-    error: result.stderr.toString(),
-  };
-}
 
 async function getDarklua() {
   const directory = path.resolve(os.homedir(), ".aftman", "bin");
   return await lookpath("darklua", { include: [directory] });
 }
 
-function minifyFile(darklua, file) {
-  const { success } = executeCommand(darklua, [
+async function minifyFile(darklua, file) {
+  const { success } = await executeCommand(darklua, [
     "process",
     "--config",
     path.resolve(__dirname, "config", `${path.basename(file)}.json`),
@@ -55,11 +29,12 @@ function minifyFile(darklua, file) {
   }
 }
 
-function cleanFile(path) {
-  fs.writeFileSync(
+async function cleanFile(path) {
+  const contents = await fs.readFile(path, "utf8");
+
+  await fs.writeFile(
     path,
-    fs
-      .readFileSync(path, "utf8")
+    contents
       .replace(/(\r\n|\n|\r)/g, " ")
       .replace(/\s+/g, " ")
       .trim(),
@@ -78,7 +53,8 @@ const config = {
   input: path.resolve(outFolder, "init.luau"),
   output: path.resolve(outFolder, "script.lua"),
   outputMin: path.resolve(outFolder, "script.min.lua"),
-  rojoConfig: path.resolve(assetsFolder, "rojo.json"),
+  outputRojo: path.resolve(assetsFolder, "rojo", "studio", "script.client.lua"),
+  rojoConfig: path.resolve(assetsFolder, "rojo", "default.project.json"),
   include: path.resolve(outFolder, "include"),
   nodeModules: path.resolve(root, "node_modules"),
 };
@@ -88,9 +64,9 @@ async function main() {
   const spinner = yocto({ text: "Building", color: "blue" }).start();
   const darklua = await getDarklua();
 
-  function error(...args) {
+  async function error(...args) {
     spinner.error(...args);
-    clean(config.clean);
+    await clean(config.clean);
     process.exit(1);
   }
 
@@ -100,53 +76,54 @@ async function main() {
   }
 
   if (!darklua) {
-    error("Couldn't find 'darklua'");
+    await error("Couldn't find 'darklua'");
   }
 
-  const elapsed = measure(function () {
+  const elapsed = await measure(async function () {
     try {
-      clean(config.clean);
+      await clean(config.clean);
       build.handler({
         project: ".",
         rojo: config.rojoConfig,
         includePath: config.include,
       });
     } catch {
-      error("Failed to build");
+      await error("Failed to build");
     }
 
     try {
       changeSpinner("Bundling", "yellow");
-      bundler(config);
+      await bundler(config);
     } catch {
-      error("Failed to bundle");
+      await error("Failed to bundle");
     }
 
     try {
       changeSpinner("Moving Files", "magenta");
-      clean(config.clean);
+      await clean(config.clean);
 
-      fs.mkdirSync(config.folder, { recursive: true });
-      fs.renameSync(path.basename(config.output), config.output);
+      await fs.mkdir(config.folder, { recursive: true });
+      await fs.rename(path.basename(config.output), config.output);
     } catch {
-      error("Failed to move files");
+      await error("Failed to move files");
     }
 
     try {
       changeSpinner("Minifying", "green");
 
-      minifyFile(darklua, config.output);
-      fs.cpSync(config.output, config.outputMin, { force: true });
+      await minifyFile(darklua, config.output);
+      await fs.cp(config.output, config.outputMin, { force: true });
 
-      cleanFile(config.outputMin);
-      minifyFile(darklua, config.outputMin);
+      await cleanFile(config.outputMin);
+      await minifyFile(darklua, config.outputMin);
+      await fs.cp(config.outputMin, config.outputRojo, { force: true });
     } catch {
-      error("Failed to minify");
+      await error("Failed to minify");
     }
   });
 
   spinner.success(`Built (took ${elapsed}ms)`);
 }
 
-main();
+if (require.main === module) main();
 module.exports = main;
