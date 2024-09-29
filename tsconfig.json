@@ -12,7 +12,9 @@
     "resolveJsonModule": true,
     "strict": true,
     "target": "ESNext",
-    "typeRoots": ["node_modules/@rbxts"],
+    "typeRoots": [
+      "node_modules/@rbxts"
+    ],
     "rootDir": "src",
     "outDir": "out",
     "baseUrl": "src",
