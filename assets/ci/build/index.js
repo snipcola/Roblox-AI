@@ -113,10 +113,10 @@ async function main() {
 
       await minifyFile(darklua, config.output);
       await fs.cp(config.output, config.outputMin, { force: true });
+      await fs.cp(config.output, config.outputRojo, { force: true });
 
       await cleanFile(config.outputMin);
       await minifyFile(darklua, config.outputMin);
-      await fs.cp(config.outputMin, config.outputRojo, { force: true });
     } catch {
       await error("Failed to minify");
     }
