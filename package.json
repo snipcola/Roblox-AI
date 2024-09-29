@@ -1,7 +1,7 @@
 {
   "name": "roblox-ai",
   "author": "Snipcola",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "commonjs",
   "scripts": {
     "build": "node assets/ci/build",

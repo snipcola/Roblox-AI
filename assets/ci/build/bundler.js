@@ -10,6 +10,9 @@ async function fileExists(file) {
   }
 }
 
+const windows = process.platform === "win32";
+const seperator = windows ? "\\" : "/";
+
 class Stringify {
   process(lua) {
     return lua.trim();
@@ -193,7 +196,7 @@ class Bundler {
       return {
         path: path.resolve(
           filePath,
-          [...scriptToPath(context.split(".")), ...args].join("/"),
+          [...scriptToPath(context.split(".")), ...args].join(seperator),
         ),
         args: forceArgs || args,
       };
@@ -234,10 +237,12 @@ class Bundler {
 
       if (
         typeof args === "object" &&
-        args.join("/").startsWith("include/node_modules/")
+        args
+          .join(seperator)
+          .startsWith(`include${seperator}node_modules${seperator}`)
       ) {
         result = await tryGetPath(
-          path.resolve(nodeModules, args.splice(2).join("/")),
+          path.resolve(nodeModules, args.splice(2).join(seperator)),
         );
       } else if (
         typeof args === "string" &&
@@ -315,10 +320,10 @@ class Bundler {
 
     const root = {};
     const modules = files.map(function (file, index) {
-      const _path = file.split(rootFolder).join("").replace("/", "");
+      const _path = file.split(rootFolder).join("").replace(seperator, "");
 
       return {
-        file: _path.startsWith("node_modules/")
+        file: _path.startsWith(`node_modules${seperator}`)
           ? path.resolve(include, _path)
           : file,
         path: file,
@@ -330,7 +335,7 @@ class Bundler {
       file: file
         .split(folder)
         .join("")
-        .split("/")
+        .split(seperator)
         .filter((f) => f),
       ...args,
     }));
