@@ -32,10 +32,10 @@ jobs:
         run: aftman install --no-trust-check
 
       - name: ESLint Check
-        run: pnpm run lint
+        run: pnpm lint
 
       - name: Build & Bundle
-        run: pnpm run build
+        run: pnpm build
 
       - name: Get Version
         id: version
