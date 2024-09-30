@@ -1,0 +1,27 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Build",
+      "program": "${workspaceFolder}/assets/ci/build/index.js",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Dev",
+      "program": "${workspaceFolder}/assets/ci/dev.js",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Dev (Sync)",
+      "program": "${workspaceFolder}/assets/ci/dev.js",
+      "args": ["--sync"],
+      "console": "integratedTerminal"
+    }
+  ]
+}
