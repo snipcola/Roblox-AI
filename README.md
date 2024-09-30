@@ -51,12 +51,6 @@ Make sure the following are installed:
 - [aftman](https://github.com/LPGhatguy/aftman/releases/latest)
 - [pnpm](https://pnpm.io/installation#using-a-standalone-script) (optional)
 
-It's recommended you also install the following VSCode extensions:
-
-- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-- [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-- [Roblox-TS](https://marketplace.visualstudio.com/items?itemName=roblox-ts.vscode-roblox-ts)
-
 ### Instructions
 
 If you installed `pnpm`, use that instead of `npm` for the following steps.
