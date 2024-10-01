@@ -145,7 +145,11 @@ class Bundler {
           .split("\n")
           .map((l) => `\t${l}`)
           .map((l) => (l === "\t" ? "" : l))
-          .join("\n");
+          .join("\n")
+          .replace(
+            /TS\.getModule\(script(, .+?)\)/g,
+            "TS.getModule(script.include$1)",
+          );
 
         return stringify.module(name, contents);
       },
@@ -268,6 +272,7 @@ class Bundler {
     };
 
     const tsImportRegex = /TS\.import\(([^)]+)\)/g;
+    const tsGetModulesRegex = /TS\.getModule\(([^)]+)\)/g;
     const requireRegex = /require\(([^)]+)\)/g;
 
     let paths = new Set();
@@ -277,6 +282,15 @@ class Bundler {
     let match;
 
     while ((match = tsImportRegex.exec(contents)) !== null) {
+      const args =
+        match[1] &&
+        match[1].split(",").map((arg) => arg.trim().replace(/^"|"$/g, ""));
+      args.shift();
+
+      await processPath(await getPath(toPath(args)));
+    }
+
+    while ((match = tsGetModulesRegex.exec(contents)) !== null) {
       const args =
         match[1] &&
         match[1].split(",").map((arg) => arg.trim().replace(/^"|"$/g, ""));

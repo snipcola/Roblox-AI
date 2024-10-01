@@ -1,7 +1,7 @@
 {
   "name": "roblox-ai",
   "author": "Snipcola",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "type": "commonjs",
   "scripts": {
     "build": "node assets/ci/build",
@@ -14,18 +14,18 @@
   "devDependencies": {
     "@file/types": "file:assets/types",
     "@rbxts/compiler-types": "3.0.0-types.0",
-    "@rbxts/types": "^1.0.809",
-    "@typescript-eslint/eslint-plugin": "^8.7.0",
-    "@typescript-eslint/parser": "^8.7.0",
-    "chokidar": "^4.0.1",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-prettier": "^5.2.1",
-    "eslint-plugin-roblox-ts": "^0.0.36",
-    "lookpath": "^1.2.2",
-    "prettier": "^3.3.3",
-    "roblox-ts": "^3.0.0",
-    "typescript": "^5.6.2",
-    "yocto-spinner": "^0.1.0"
+    "@rbxts/types": "1.0.809",
+    "@typescript-eslint/eslint-plugin": "8.8.0",
+    "@typescript-eslint/parser": "8.8.0",
+    "chokidar": "4.0.1",
+    "eslint": "8.57.1",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-prettier": "5.2.1",
+    "eslint-plugin-roblox-ts": "0.0.36",
+    "lookpath": "1.2.2",
+    "prettier": "3.3.3",
+    "roblox-ts": "3.0.0",
+    "typescript": "5.6.2",
+    "yocto-spinner": "0.1.0"
   }
 }
