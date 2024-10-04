@@ -2,21 +2,21 @@ const process = require("process");
 const path = require("path");
 const { measure, clean } = require("./shared/functions");
 
-const root = path.resolve(__dirname, "..", "..");
-
-const config = {
-  clean: [
-    path.resolve(root, "out"),
-    path.resolve(root, "script.lua"),
-    path.resolve(root, "node_modules"),
-    path.resolve(root, "pnpm-lock.yaml"),
-    path.resolve(root, "package-lock.json"),
-    path.resolve(root, "yarn.lock"),
-    path.resolve(root, ".DS_Store"),
-  ],
-};
-
 async function main() {
+  const root = path.resolve(__dirname, "..", "..");
+  const config = {
+    clean: [
+      path.resolve(root, "out"),
+      path.resolve(root, "script.lua"),
+      path.resolve(root, "assets", "rojo", "studio", "script.client.lua"),
+      path.resolve(root, "node_modules"),
+      path.resolve(root, "pnpm-lock.yaml"),
+      path.resolve(root, "package-lock.json"),
+      path.resolve(root, "yarn.lock"),
+      path.resolve(root, ".DS_Store"),
+    ],
+  };
+
   try {
     await clean(config.clean);
   } catch {

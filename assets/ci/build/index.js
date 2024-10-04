@@ -42,31 +42,40 @@ async function cleanFile(path) {
   );
 }
 
-const root = path.resolve(__dirname, "..", "..", "..");
-const outFolder = path.resolve(root, "out");
-const assetsFolder = path.resolve(root, "assets");
+async function main(dev, sync) {
+  const root = path.resolve(__dirname, "..", "..", "..");
+  const outFolder = path.resolve(root, "out");
+  const assetsFolder = path.resolve(root, "assets");
+  const rojoScript = path.resolve(
+    assetsFolder,
+    "rojo",
+    "studio",
+    "script.client.lua",
+  );
 
-const config = {
-  root,
-  folder: outFolder,
-  clean: [outFolder],
-  input: path.resolve(outFolder, "init.luau"),
-  output: path.resolve(outFolder, "script.lua"),
-  outputMin: path.resolve(outFolder, "script.min.lua"),
-  outputRojo: path.resolve(assetsFolder, "rojo", "studio", "script.client.lua"),
-  rojoConfig: path.resolve(assetsFolder, "rojo", "default.project.json"),
-  include: path.resolve(outFolder, "include"),
-  nodeModules: path.resolve(root, "node_modules"),
-};
+  const config = {
+    root,
+    folder: outFolder,
+    clean: [outFolder, ...(!sync ? [rojoScript] : [])],
+    input: path.resolve(outFolder, "init.luau"),
+    output: path.resolve(outFolder, "script.lua"),
+    outputMin: path.resolve(outFolder, "script.min.lua"),
+    outputRojo: rojoScript,
+    rojoConfig: path.resolve(assetsFolder, "rojo", "default.project.json"),
+    include: path.resolve(outFolder, "include"),
+    nodeModules: path.resolve(root, "node_modules"),
+  };
 
-async function main(dev) {
   const { default: yocto } = await import("yocto-spinner");
   const spinner = yocto({ text: "Building", color: "blue" }).start();
   const darklua = await getDarklua();
 
   async function error(...args) {
     spinner.error(...args);
-    await clean(config.clean);
+    await clean([
+      ...config.clean,
+      path.resolve(root, path.basename(config.output)),
+    ]);
     if (!dev) process.exit(1);
   }
 
@@ -106,7 +115,10 @@ async function main(dev) {
       await clean(config.clean);
 
       await fs.mkdir(config.folder, { recursive: true });
-      await fs.rename(path.basename(config.output), config.output);
+      await fs.rename(
+        path.resolve(root, path.basename(config.output)),
+        config.output,
+      );
     } catch {
       await error("Failed to move files");
       return;
@@ -117,7 +129,7 @@ async function main(dev) {
 
       await minifyFile(darklua, config.output);
       await fs.cp(config.output, config.outputMin, { force: true });
-      await fs.cp(config.output, config.outputRojo, { force: true });
+      if (sync) await fs.cp(config.output, config.outputRojo, { force: true });
 
       await cleanFile(config.outputMin);
       await minifyFile(darklua, config.outputMin);

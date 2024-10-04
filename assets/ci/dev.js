@@ -9,6 +9,7 @@ const { lookpath } = require("lookpath");
 const build = require("./build");
 
 let lock = false;
+let sync = false;
 
 function watchFolder(folder) {
   const watcher = watch(folder, {
@@ -22,7 +23,7 @@ function watchFolder(folder) {
       if (lock || !path) return;
       lock = true;
 
-      await build(true);
+      await build(true, sync);
       lock = false;
     });
   });
@@ -45,22 +46,20 @@ async function syncRojo(rojoConfig) {
   await executeCommand(rojo, ["serve", rojoConfig]);
 }
 
-async function main(config) {
-  await build(true);
-  watchFolder(config.folder);
+async function main() {
+  const root = path.resolve(__dirname, "..", "..");
+  const config = {
+    folder: path.resolve(root, "src"),
+    rojoConfig: path.resolve(root, "assets", "rojo", "studio"),
+  };
 
-  const args = process.argv.splice(2);
-
-  if (["--sync", "-s"].some((a) => args.includes(a))) {
-    syncRojo(config.rojoConfig);
+  if (["--sync", "-s"].some((a) => process.argv.splice(2).includes(a))) {
+    sync = true;
   }
+
+  await build(true, sync);
+  watchFolder(config.folder);
+  if (sync) syncRojo(config.rojoConfig);
 }
 
-const root = path.resolve(__dirname, "..", "..");
-
-const config = {
-  folder: path.resolve(root, "src"),
-  rojoConfig: path.resolve(root, "assets", "rojo", "studio"),
-};
-
-main(config);
+main();

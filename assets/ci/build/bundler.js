@@ -385,7 +385,7 @@ class Bundler {
   }
 
   async bundle() {
-    const { input, output } = this.config;
+    const { root, input, output } = this.config;
     const contents = await fs.readFile(input, "utf8");
 
     const { modules, tree } = this.createTree([
@@ -413,7 +413,11 @@ class Bundler {
       ),
     );
 
-    await fs.writeFile(path.basename(output), _output.join("\n\n"), "utf8");
+    await fs.writeFile(
+      path.resolve(root, path.basename(output)),
+      _output.join("\n\n"),
+      "utf8",
+    );
   }
 }
 
