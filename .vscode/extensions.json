@@ -2,6 +2,7 @@
   "recommendations": [
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "roblox-ts.vscode-roblox-ts"
+    "roblox-ts.vscode-roblox-ts",
+    "Fireboltofdeath.vscode-roblox-ts"
   ]
 }

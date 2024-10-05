@@ -3,7 +3,7 @@ const process = require("process");
 const path = require("path");
 
 const { watch } = require("chokidar");
-const { executeCommand } = require("./shared/functions");
+const { executeCommand, error } = require("./shared/functions");
 
 const { lookpath } = require("lookpath");
 const build = require("./build");
@@ -38,8 +38,7 @@ async function syncRojo(rojoConfig) {
   const rojo = await getRojo();
 
   if (!rojo) {
-    console.error("\u2716 Rojo not found");
-    process.exit(1);
+    error(true, "'rojo' not found.");
   }
 
   await executeCommand(rojo, ["plugin", "install"]);

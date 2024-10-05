@@ -1,6 +1,26 @@
 const fs = require("fs/promises");
 const process = require("process");
+
 const { spawn } = require("child_process");
+const { blue, green, red } = require("colorette");
+
+function info(message) {
+  console.log(blue(`i ${message}`));
+}
+
+function success(message) {
+  console.log(green(`√ ${message}`));
+}
+
+function error(exit, message) {
+  if (message) {
+    console.error(red(`× ${message}`));
+  }
+
+  if (exit) {
+    process.exit(1);
+  }
+}
 
 async function measure(callback) {
   const start = performance.now();
@@ -54,4 +74,7 @@ module.exports = {
   measure,
   executeCommand,
   clean,
+  info,
+  success,
+  error,
 };

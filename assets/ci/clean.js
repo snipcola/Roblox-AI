@@ -1,6 +1,5 @@
-const process = require("process");
 const path = require("path");
-const { measure, clean } = require("./shared/functions");
+const { measure, clean, info, success, error } = require("./shared/functions");
 
 async function main() {
   const root = path.resolve(__dirname, "..", "..");
@@ -20,14 +19,13 @@ async function main() {
   try {
     await clean(config.clean);
   } catch {
-    console.error("\u2716 Failed to clean");
-    process.exit(1);
+    error(true, "Failed to clean.");
   }
 }
 
 async function measureMain() {
-  console.log("- Cleaning");
-  console.log(`\u2714 Cleaned (took ${await measure(main)}ms)`);
+  info("Cleaning.");
+  success(`Cleaned (took ${await measure(main)}ms).`);
 }
 
 measureMain();
