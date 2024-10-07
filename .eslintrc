@@ -12,12 +12,10 @@
     "roblox-ts",
     "@typescript-eslint",
     "@typescript-eslint/eslint-plugin",
-    "prettier",
   ],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended",
     "plugin:roblox-ts/recommended",
   ],
   "rules": {
@@ -33,7 +31,6 @@
     "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-empty-function": "warn",
-    "prettier/prettier": "off",
     "roblox-ts/lua-truthiness": "off",
     "prefer-const": [
       "warn",

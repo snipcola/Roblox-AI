@@ -52,7 +52,7 @@ async function main() {
     rojoConfig: path.resolve(root, "assets", "rojo", "studio"),
   };
 
-  if (["--sync", "-s"].some((a) => process.argv.splice(2).includes(a))) {
+  if (process.argv.splice(2).some((a) => ["--sync", "-s"].includes(a))) {
     sync = true;
   }
 
