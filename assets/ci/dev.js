@@ -1,15 +1,16 @@
 const os = require("os");
-const process = require("process");
 const path = require("path");
 
 const { watch } = require("chokidar");
-const { executeCommand, error } = require("./shared/functions");
+const { executeCommand, error, hasArgs } = require("./shared/functions");
 
 const { lookpath } = require("lookpath");
 const build = require("./build");
 
 let lock = false;
-let sync = false;
+
+const package = hasArgs("--package", "-p");
+const sync = !package && hasArgs("--sync", "-s");
 
 function watchFolder(folder) {
   const watcher = watch(folder, {
@@ -23,7 +24,7 @@ function watchFolder(folder) {
       if (lock || !path) return;
       lock = true;
 
-      await build(true, sync);
+      await build(true, sync, package);
       lock = false;
     });
   });
@@ -52,11 +53,7 @@ async function main() {
     rojoConfig: path.resolve(root, "assets", "rojo", "studio"),
   };
 
-  if (process.argv.splice(2).some((a) => ["--sync", "-s"].includes(a))) {
-    sync = true;
-  }
-
-  await build(true, sync);
+  await build(true, sync, package);
   watchFolder(config.folder);
   if (sync) syncRojo(config.rojoConfig);
 }

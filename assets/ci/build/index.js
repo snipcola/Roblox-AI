@@ -5,7 +5,12 @@ const path = require("path");
 const process = require("process");
 
 const { lookpath } = require("lookpath");
-const { executeCommand, measure, clean } = require("../shared/functions");
+const {
+  executeCommand,
+  measure,
+  clean,
+  hasArgs,
+} = require("../shared/functions");
 
 const build = require("roblox-ts/out/CLI/commands/build");
 const bundler = require("./bundler");
@@ -42,7 +47,9 @@ async function cleanFile(path) {
   );
 }
 
-async function main(dev, sync) {
+async function main(dev, sync, package) {
+  package = package || hasArgs("--package", "-p");
+
   const root = path.resolve(__dirname, "..", "..", "..");
   const outFolder = path.resolve(root, "out");
   const assetsFolder = path.resolve(root, "assets");
@@ -95,47 +102,59 @@ async function main(dev, sync) {
       build.handler({
         project: ".",
         rojo: config.rojoConfig,
-        includePath: config.include,
+        ...(!package
+          ? {
+              includePath: config.include,
+            }
+          : {
+              type: "package",
+              noInclude: true,
+            }),
       });
     } catch {
       await error("Failed to build");
       return;
     }
 
-    try {
-      changeSpinner("Bundling", "yellow");
-      await bundler(config);
-    } catch {
-      await error("Failed to bundle");
-      return;
-    }
+    if (!package) {
+      try {
+        changeSpinner("Bundling", "yellow");
+        await bundler(config);
+      } catch {
+        await error("Failed to bundle");
+        return;
+      }
 
-    try {
-      changeSpinner("Moving Files", "magenta");
-      await clean(config.clean);
+      try {
+        changeSpinner("Moving Files", "magenta");
+        await clean(config.clean);
 
-      await fs.mkdir(config.folder, { recursive: true });
-      await fs.rename(
-        path.resolve(root, path.basename(config.output)),
-        config.output,
-      );
-    } catch {
-      await error("Failed to move files");
-      return;
-    }
+        await fs.mkdir(config.folder, { recursive: true });
+        await fs.rename(
+          path.resolve(root, path.basename(config.output)),
+          config.output,
+        );
+      } catch {
+        await error("Failed to move files");
+        return;
+      }
 
-    try {
-      changeSpinner("Minifying", "green");
+      try {
+        changeSpinner("Minifying", "green");
 
-      await minifyFile(darklua, config.output);
-      await fs.cp(config.output, config.outputMin, { force: true });
-      if (sync) await fs.cp(config.output, config.outputRojo, { force: true });
+        await minifyFile(darklua, config.output);
+        await fs.cp(config.output, config.outputMin, { force: true });
 
-      await cleanFile(config.outputMin);
-      await minifyFile(darklua, config.outputMin);
-    } catch {
-      await error("Failed to minify");
-      return;
+        if (sync) {
+          await fs.cp(config.output, config.outputRojo, { force: true });
+        }
+
+        await cleanFile(config.outputMin);
+        await minifyFile(darklua, config.outputMin);
+      } catch {
+        await error("Failed to minify");
+        return;
+      }
     }
   });
 

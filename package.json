@@ -1,10 +1,18 @@
 {
   "name": "roblox-ai",
   "author": "Snipcola",
-  "version": "0.2.2",
+  "version": "0.2.3",
+  "license": "MIT",
   "type": "commonjs",
+  "files": [
+    "out"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "node assets/ci/build",
+    "prepublishOnly": "node assets/ci/build",
     "dev": "node assets/ci/dev",
     "clean": "node assets/ci/clean",
     "release": "git push origin main:release --force",
@@ -26,6 +34,7 @@
     "lookpath": "1.2.2",
     "prettier": "3.3.3",
     "roblox-ts": "3.0.0",
+    "semver": "7.6.3",
     "typescript": "5.6.2",
     "yocto-spinner": "0.1.0"
   }

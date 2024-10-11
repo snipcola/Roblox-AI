@@ -70,6 +70,10 @@ async function clean(folders) {
   );
 }
 
+function hasArgs(...args) {
+  return process.argv.slice(2).some((a) => args.includes(a));
+}
+
 module.exports = {
   measure,
   executeCommand,
@@ -77,4 +81,5 @@ module.exports = {
   info,
   success,
   error,
+  hasArgs,
 };

@@ -1,5 +1,6 @@
 const fs = require("fs/promises");
 const path = require("path");
+const semver = require("semver");
 
 async function fileExists(file) {
   try {
@@ -129,6 +130,7 @@ const stringify = new Stringify();
 class Bundler {
   config = {};
   initFiles = ["init.luau", "init.lua"];
+  pnpmPackages = [];
 
   constructor(config) {
     this.config = config;
@@ -145,11 +147,7 @@ class Bundler {
           .split("\n")
           .map((l) => `\t${l}`)
           .map((l) => (l === "\t" ? "" : l))
-          .join("\n")
-          .replace(
-            /TS\.getModule\(script(, .+?)\)/g,
-            "TS.getModule(script.include$1)",
-          );
+          .join("\n");
 
         return stringify.module(name, contents);
       },
@@ -206,7 +204,7 @@ class Bundler {
       };
     }
 
-    async function getPath({ path: _path, args }) {
+    const getPath = async ({ path: _path, args }) => {
       if (!_path) return;
 
       async function tryGetPath(_path) {
@@ -245,9 +243,25 @@ class Bundler {
           .join(separator)
           .startsWith(`include${separator}node_modules${separator}`)
       ) {
-        result = await tryGetPath(
-          path.resolve(nodeModules, args.splice(2).join(separator)),
-        );
+        const _path = args.splice(2).join(separator);
+        result = await tryGetPath(path.resolve(nodeModules, _path));
+
+        if (!result && this.pnpmPackages) {
+          const _package = this.pnpmPackages.find(({ name }) =>
+            _path.startsWith(name),
+          );
+
+          if (_package) {
+            result = await tryGetPath(
+              path.resolve(
+                _package.path,
+                "node_modules",
+                _package.name,
+                _path.split(_package.name).join("").replace(separator, ""),
+              ),
+            );
+          }
+        }
       } else if (
         typeof args === "string" &&
         args.split(".").splice(-2, 1).join() === "include"
@@ -256,7 +270,7 @@ class Bundler {
       }
 
       if (result) return result;
-    }
+    };
 
     const processPath = async (_path) => {
       if (!_path || paths.has(_path) || _path === filePath) return;
@@ -272,7 +286,7 @@ class Bundler {
     };
 
     const tsImportRegex = /TS\.import\(([^)]+)\)/g;
-    const tsGetModulesRegex = /TS\.getModule\(([^)]+)\)/g;
+    const tsGetModulesRegex = /TS\.getModule\(([^)]+)\)(?:\.([^)]+))?/g;
     const requireRegex = /require\(([^)]+)\)/g;
 
     let paths = new Set();
@@ -287,6 +301,10 @@ class Bundler {
         match[1].split(",").map((arg) => arg.trim().replace(/^"|"$/g, ""));
       args.shift();
 
+      if (args[0] && args[0].startsWith("TS.getModule(")) {
+        continue;
+      }
+
       await processPath(await getPath(toPath(args)));
     }
 
@@ -294,9 +312,12 @@ class Bundler {
       const args =
         match[1] &&
         match[1].split(",").map((arg) => arg.trim().replace(/^"|"$/g, ""));
+      if (match[2]) args.push(...match[2].split("."));
       args.shift();
 
-      await processPath(await getPath(toPath(args)));
+      await processPath(
+        await getPath(toPath(["script", "include", "node_modules", ...args])),
+      );
     }
 
     while ((match = requireRegex.exec(contents)) !== null) {
@@ -334,12 +355,22 @@ class Bundler {
 
     const root = {};
     const modules = files.map(function (file, index) {
-      const _path = file.split(rootFolder).join("").replace(separator, "");
+      let _path = file.split(rootFolder).join("").replace(separator, "");
+
+      if (_path.startsWith(`node_modules${separator}.pnpm${separator}`)) {
+        _path = path.resolve(
+          include,
+          "node_modules",
+          _path.split("node_modules").pop().replace(separator, ""),
+        );
+      } else if (_path.startsWith(`node_modules${separator}`)) {
+        _path = path.resolve(include, _path);
+      } else {
+        _path = file;
+      }
 
       return {
-        file: _path.startsWith(`node_modules${separator}`)
-          ? path.resolve(include, _path)
-          : file,
+        file: _path,
         path: file,
         index: index.toString(),
       };
@@ -384,6 +415,40 @@ class Bundler {
     };
   }
 
+  async prepare() {
+    const { nodeModules } = this.config;
+    const pnpm = path.resolve(nodeModules, ".pnpm");
+
+    if ((await fileExists(pnpm)) && (await fs.stat(pnpm)).isDirectory()) {
+      this.pnpmPackages = ((await fs.readdir(pnpm)) || [])
+        .map(function (file) {
+          const _path = path.resolve(pnpm, file);
+          file = file.split("@");
+
+          const version = file.length !== 1 && file.pop();
+          const name = file.join("@").replace(/\+/g, separator);
+
+          return { path: _path, name, version };
+        })
+        .reduce(function (newArray, { path: _path, name, version }, _, array) {
+          const existingFile = array.find(
+            (f) => f.name === name && f.version !== version,
+          );
+
+          try {
+            if (
+              !existingFile?.version ||
+              semver.gt(version, existingFile.version)
+            ) {
+              newArray.push({ path: _path, name });
+            }
+          } catch {}
+
+          return newArray;
+        }, []);
+    }
+  }
+
   async bundle() {
     const { root, input, output } = this.config;
     const contents = await fs.readFile(input, "utf8");
@@ -423,5 +488,6 @@ class Bundler {
 
 module.exports = async function (config) {
   const bundler = new Bundler(config);
+  await bundler.prepare();
   await bundler.bundle();
 };
