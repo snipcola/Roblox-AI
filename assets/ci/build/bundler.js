@@ -234,6 +234,12 @@ class Bundler {
         } catch {}
       }
 
+      function parseModuleName(module) {
+        return module.startsWith("@")
+          ? module.split(separator).slice(0, 2).join(separator)
+          : module.split(separator).shift();
+      }
+
       let result = await tryGetPath(_path);
       if (result) return result;
 
@@ -243,28 +249,68 @@ class Bundler {
           .join(separator)
           .startsWith(`include${separator}node_modules${separator}`)
       ) {
-        const _path = args.splice(2).join(separator);
-        result = await tryGetPath(path.resolve(nodeModules, _path));
+        const module = args.slice(2).join(separator);
+        const moduleName = parseModuleName(module);
 
-        if (!result && this.pnpmPackages) {
-          const _package = this.pnpmPackages.find(({ name }) =>
-            _path.startsWith(name),
-          );
+        if (this.pnpmPackages?.find((p) => p.name === moduleName)) {
+          const splitPath = _path.split("node_modules");
+          const isPNPM =
+            splitPath[1] &&
+            splitPath[1].replace(separator, "").startsWith(`.pnpm${separator}`);
 
-          if (_package) {
-            result = await tryGetPath(
-              path.resolve(
-                _package.path,
-                "node_modules",
-                _package.name,
-                _path.split(_package.name).join("").replace(separator, ""),
-              ),
+          const baseModule =
+            splitPath[isPNPM + 1] &&
+            splitPath[isPNPM + 1].replace(separator, "");
+
+          const packageJSONPath =
+            baseModule &&
+            path.resolve(
+              `${splitPath.shift()}${isPNPM ? `node_modules${splitPath.shift()}` : ""}`,
+              "node_modules",
+              parseModuleName(baseModule),
+              "package.json",
             );
+
+          const packageJSONExists =
+            packageJSONPath && (await fileExists(packageJSONPath));
+
+          if (packageJSONExists) {
+            try {
+              const json = JSON.parse(
+                await fs.readFile(packageJSONPath, "utf8"),
+              );
+
+              const dependencies = {
+                ...(json.dependencies || {}),
+                ...(json.devDependencies || {}),
+              };
+
+              const _version = dependencies[moduleName];
+              const _package = this.pnpmPackages.find(
+                ({ name, version }) =>
+                  name === moduleName && semver.satisfies(version, _version),
+              );
+
+              if (_package) {
+                result = await tryGetPath(
+                  path.resolve(
+                    _package.path,
+                    "node_modules",
+                    _package.name,
+                    module.split(_package.name).join("").replace(separator, ""),
+                  ),
+                );
+              }
+            } catch {}
           }
+        }
+
+        if (!result) {
+          result = await tryGetPath(path.resolve(nodeModules, module));
         }
       } else if (
         typeof args === "string" &&
-        args.split(".").splice(-2, 1).join() === "include"
+        args.split(".").slice(-2, 1).join() === "include"
       ) {
         result = await tryGetPath(path.resolve(include, args.split(".").pop()));
       }
@@ -420,32 +466,15 @@ class Bundler {
     const pnpm = path.resolve(nodeModules, ".pnpm");
 
     if ((await fileExists(pnpm)) && (await fs.stat(pnpm)).isDirectory()) {
-      this.pnpmPackages = ((await fs.readdir(pnpm)) || [])
-        .map(function (file) {
-          const _path = path.resolve(pnpm, file);
-          file = file.split("@");
+      this.pnpmPackages = ((await fs.readdir(pnpm)) || []).map(function (file) {
+        const _path = path.resolve(pnpm, file);
+        file = file.split("@");
 
-          const version = file.length !== 1 && file.pop();
-          const name = file.join("@").replace(/\+/g, separator);
+        const version = file.length !== 1 && file.pop();
+        const name = file.join("@").replace(/\+/g, separator);
 
-          return { path: _path, name, version };
-        })
-        .reduce(function (newArray, { path: _path, name, version }, _, array) {
-          const existingFile = array.find(
-            (f) => f.name === name && f.version !== version,
-          );
-
-          try {
-            if (
-              !existingFile?.version ||
-              semver.gt(version, existingFile.version)
-            ) {
-              newArray.push({ path: _path, name });
-            }
-          } catch {}
-
-          return newArray;
-        }, []);
+        return { path: _path, name, version };
+      });
     }
   }
 

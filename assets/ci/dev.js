@@ -9,8 +9,8 @@ const build = require("./build");
 
 let lock = false;
 
-const package = hasArgs("--package", "-p");
-const sync = !package && hasArgs("--sync", "-s");
+const _package = hasArgs("--package", "-p");
+const sync = !_package && hasArgs("--sync", "-s");
 
 function watchFolder(folder) {
   const watcher = watch(folder, {
@@ -24,7 +24,7 @@ function watchFolder(folder) {
       if (lock || !path) return;
       lock = true;
 
-      await build(true, sync, package);
+      await build(true, sync, _package);
       lock = false;
     });
   });
@@ -53,7 +53,7 @@ async function main() {
     rojoConfig: path.resolve(root, "assets", "rojo", "studio"),
   };
 
-  await build(true, sync, package);
+  await build(true, sync, _package);
   watchFolder(config.folder);
   if (sync) syncRojo(config.rojoConfig);
 }

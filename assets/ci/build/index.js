@@ -47,8 +47,8 @@ async function cleanFile(path) {
   );
 }
 
-async function main(dev, sync, package) {
-  package = package || hasArgs("--package", "-p");
+async function main(dev, sync, _package) {
+  _package = _package || hasArgs("--package", "-p");
 
   const root = path.resolve(__dirname, "..", "..", "..");
   const outFolder = path.resolve(root, "out");
@@ -102,7 +102,7 @@ async function main(dev, sync, package) {
       build.handler({
         project: ".",
         rojo: config.rojoConfig,
-        ...(!package
+        ...(!_package
           ? {
               includePath: config.include,
             }
@@ -116,7 +116,7 @@ async function main(dev, sync, package) {
       return;
     }
 
-    if (!package) {
+    if (!_package) {
       try {
         changeSpinner("Bundling", "yellow");
         await bundler(config);
