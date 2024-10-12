@@ -3,12 +3,12 @@
   "rules": [
     "remove_spaces",
     "remove_comments",
+    "remove_empty_do",
+    "remove_nil_declaration",
     "remove_unused_if_branch",
     "remove_unused_while",
-    "filter_after_early_return",
-    "remove_empty_do",
     "remove_unused_variable",
     "convert_index_to_field",
-    "remove_nil_declaration"
+    "filter_after_early_return"
   ]
 }

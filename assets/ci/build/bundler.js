@@ -47,7 +47,7 @@ class Stringify {
           __scripts[link] = proxy
         end
 
-        for _, v in ipairs(children) do
+        for _, v in ipairs(children or {}) do
           parse(v, proxy)
         end
 
@@ -399,6 +399,16 @@ class Bundler {
       }, []);
     }
 
+    function cleanArray(array) {
+      return array.reduce((acc, item) => {
+        if (Array.isArray(item)) {
+          const newItem = cleanArray(item);
+          if (newItem.length > 0) acc.push(newItem);
+        } else acc.push(item);
+        return acc;
+      }, []);
+    }
+
     const root = {};
     const modules = files.map(function (file, index) {
       let _path = file.split(rootFolder).join("").replace(separator, "");
@@ -449,14 +459,16 @@ class Bundler {
 
     return {
       modules,
-      tree: removeFromArray(
-        toArray({
-          [path.basename(folder)]: {
-            children: root,
-            directory: true,
-          },
-        }),
-        "init",
+      tree: cleanArray(
+        removeFromArray(
+          toArray({
+            [path.basename(folder)]: {
+              children: root,
+              directory: true,
+            },
+          }),
+          "init",
+        ),
       ),
     };
   }
