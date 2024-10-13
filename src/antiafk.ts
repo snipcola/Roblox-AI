@@ -1,12 +1,25 @@
 import config from "config";
 import store from "store";
 import log from "log";
-import { executeCode } from "functions";
 
 const players = game.GetService("Players");
 const localPlayer = players.LocalPlayer;
 
 let connection: RBXScriptConnection | undefined = store.get("AntiAFK");
+
+interface VirtualUser {
+  CaptureController(): undefined;
+  ClickButton2(position: Vector2, camera?: CFrame): undefined;
+}
+
+type PossiblyVirtualUser = VirtualUser | undefined;
+let VirtualUser: PossiblyVirtualUser;
+
+try {
+  VirtualUser = game.FindService("VirtualUser") as PossiblyVirtualUser;
+} catch {
+  log("error", "AntiAFK", "VirtualUser not found.");
+}
 
 function disconnectEvent() {
   if (connection?.Connected) {
@@ -19,20 +32,15 @@ function disconnectEvent() {
 }
 
 function connectEvent() {
-  if (!config.Settings.AntiAFK) {
-    return;
+  if (VirtualUser && config.Settings.AntiAFK) {
+    connection = localPlayer.Idled.Connect(function () {
+      VirtualUser.CaptureController();
+      VirtualUser.ClickButton2(new Vector2());
+    });
+
+    store.set("AntiAFK", connection);
+    log("debug", "AntiAFK", "Connected");
   }
-
-  connection = localPlayer.Idled.Connect(function () {
-    executeCode(`
-      local virtualUser = game:GetService("VirtualUser")
-      virtualUser:CaptureController()
-			virtualUser:ClickButton2(Vector2.new())
-    `);
-  });
-
-  store.set("AntiAFK", connection);
-  log("debug", "AntiAFK", "Connected");
 }
 
 function initialize() {

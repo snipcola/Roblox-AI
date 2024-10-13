@@ -2,6 +2,8 @@ import log from "log";
 import config from "config";
 
 const httpService = game.GetService("HttpService");
+const tweenService = game.GetService("TweenService");
+
 const players = game.GetService("Players");
 const localPlayer = players.LocalPlayer;
 
@@ -19,33 +21,12 @@ export function isTagged(message: string): boolean {
   return match?.size() > 0;
 }
 
-export function executeCode(code: string, logCode?: boolean) {
-  if (!loadstring) {
-    log("error", "Execute", "Loadstring function unavailable.");
-    return;
-  }
-
-  const [callback, _error] = loadstring(code);
-  if (logCode) log("debug", "Execute", code);
-
-  if (_error) {
-    log("error", "Execute", _error);
-  } else if (callback) {
-    try {
-      callback();
-    } catch {
-      log("error", "Execute", code);
-    }
-  }
-}
-
 function playerInDistance(player: Player): boolean {
   if (!config.Settings.MinimumDistance) {
     return true;
   }
 
-  const position =
-    player.Character && localPlayer?.Character?.PrimaryPart?.Position;
+  const position = player.Character && getPlayerRootPart(localPlayer)?.Position;
 
   return position
     ? player.DistanceFromCharacter(position) <= config.Settings.MinimumDistance
@@ -71,8 +52,36 @@ export function getPlayerHumanoid(player: Player) {
   return player.Character?.FindFirstChildOfClass("Humanoid");
 }
 
-export function getPlayerPrimaryPart(player: Player) {
-  return player.Character?.PrimaryPart;
+export function getPlayerRootPart(player: Player) {
+  return getPlayerHumanoid(player)?.RootPart;
+}
+
+export function lookAtPlayer(player: Player, wait: boolean) {
+  const localPlayerRootPart = getPlayerRootPart(localPlayer);
+  const playerRootPart = getPlayerRootPart(player);
+
+  if (!(localPlayerRootPart && playerRootPart)) {
+    return;
+  }
+
+  const targetPosition = new Vector3(
+    playerRootPart.Position.X,
+    localPlayerRootPart.Position.Y,
+    playerRootPart.Position.Z,
+  );
+
+  const tweenInfo = new TweenInfo(
+    config.Settings.LookSpeed || 0.25,
+    Enum.EasingStyle.Sine,
+    Enum.EasingDirection.InOut,
+  );
+
+  const tween = tweenService.Create(localPlayerRootPart, tweenInfo, {
+    CFrame: CFrame.lookAt(localPlayerRootPart.Position, targetPosition),
+  });
+
+  tween.Play();
+  if (wait) tween.Completed.Wait();
 }
 
 function startsWith(one: string, two: string) {
@@ -151,9 +160,13 @@ export function sendRequest(
     Compress: Enum.HttpCompression.Gzip,
   };
 
-  const { Success, Body } = request
-    ? request(args)
-    : httpService.RequestAsync(args);
+  try {
+    const { Success, Body } = request
+      ? request(args)
+      : httpService.RequestAsync(args);
 
-  return { Success, Body };
+    return { Success, Body };
+  } catch {
+    log("error", "Request", "Failed to create request.");
+  }
 }

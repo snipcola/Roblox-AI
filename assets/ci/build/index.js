@@ -36,15 +36,7 @@ async function minifyFile(darklua, file) {
 
 async function cleanFile(path) {
   const contents = await fs.readFile(path, "utf8");
-
-  await fs.writeFile(
-    path,
-    contents
-      .replace(/(\r\n|\n|\r)/g, " ")
-      .replace(/\s+/g, " ")
-      .trim(),
-    "utf8",
-  );
+  await fs.writeFile(path, contents.replace(/(\n|\r)/g, " ").trim(), "utf8");
 }
 
 async function main(dev, sync, _package) {

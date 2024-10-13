@@ -16,8 +16,9 @@ getgenv()["RobloxAI.Config"] = {
   },
   Settings = {
     AntiAFK = true,
-    MinimumDistance = 5,
-    MessageProcessDelay = 1
+    MinimumDistance = 8,
+    MessageProcessDelay = 1,
+    LookSpeed = 0.25
   },
   AI = {
     Prompt = "",

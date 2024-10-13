@@ -5,7 +5,8 @@ import {
   sendRequest,
   getPlayerFromPartialName,
   getPlayerHumanoid,
-  getPlayerPrimaryPart,
+  getPlayerRootPart,
+  lookAtPlayer,
   isPlayerInAir,
   jump,
 } from "functions";
@@ -108,7 +109,7 @@ interface Response {
 
 interface AvailableFunction {
   tool: Tool;
-  callback: Callback;
+  callback: (args?: object) => Function;
 }
 
 type AvailableFunctions = Array<AvailableFunction>;
@@ -154,7 +155,7 @@ const functions: AvailableFunctions = [
         strict: true,
       },
     },
-    callback: function ({
+    callback: ({
       message,
       amount = 1,
       interval = 0,
@@ -162,7 +163,7 @@ const functions: AvailableFunctions = [
       message: string;
       amount: number;
       interval: number;
-    }) {
+    }) => {
       for (let i = 0; i < amount; i++) {
         aiSendMessage(message);
         task.wait(interval);
@@ -190,13 +191,16 @@ const functions: AvailableFunctions = [
         strict: true,
       },
     },
-    callback: function ({ player: name }: { player: string }) {
+    callback: ({ player: name }: { player: string }) => {
       const player = getPlayerFromPartialName(name);
       if (!player) return;
 
-      const localPlayerPrimaryPart = getPlayerPrimaryPart(localPlayer);
-      const playerPrimaryPart = getPlayerPrimaryPart(player);
-      if (!(localPlayerPrimaryPart && playerPrimaryPart)) return;
+      const localPlayerRootPart = getPlayerRootPart(localPlayer);
+      const playerRootPart = getPlayerRootPart(player);
+
+      if (!(localPlayerRootPart && playerRootPart)) {
+        return;
+      }
 
       const localPlayerHumanoid = getPlayerHumanoid(localPlayer);
 
@@ -205,7 +209,7 @@ const functions: AvailableFunctions = [
         task.wait();
       }
 
-      localPlayerPrimaryPart.CFrame = playerPrimaryPart.CFrame;
+      localPlayerRootPart.CFrame = playerRootPart.CFrame;
     },
   },
   {
@@ -233,14 +237,14 @@ const functions: AvailableFunctions = [
         strict: true,
       },
     },
-    callback: function ({
+    callback: ({
       player: name,
       follow = false,
     }: {
       player: string;
       follow: boolean;
       jump: boolean;
-    }) {
+    }) => {
       const player = getPlayerFromPartialName(name);
       if (!player) return;
 
@@ -256,24 +260,27 @@ const functions: AvailableFunctions = [
 
       while (task.wait()) {
         localPlayerHumanoid = getPlayerHumanoid(localPlayer);
-        const playerPrimaryPart = getPlayerPrimaryPart(player);
+        const playerRootPart = getPlayerRootPart(player);
 
         if (!(store.get("WalkingToPlayer") && players.FindFirstChild(name)))
           break;
-        if (!(localPlayerHumanoid && playerPrimaryPart)) return;
 
-        const localPlayerPrimaryPart = getPlayerPrimaryPart(localPlayer);
+        if (!(localPlayerHumanoid && playerRootPart)) {
+          return;
+        }
+
+        const localPlayerRootPart = getPlayerRootPart(localPlayer);
 
         if (
           !follow &&
-          localPlayerPrimaryPart?.Position &&
-          player.DistanceFromCharacter(localPlayerPrimaryPart?.Position) <= 2.5
+          localPlayerRootPart &&
+          player.DistanceFromCharacter(localPlayerRootPart.Position) <= 2.5
         ) {
           if (stopWalkingToPlayer) stopWalkingToPlayer();
           return;
         }
 
-        localPlayerHumanoid.MoveTo(playerPrimaryPart.Position);
+        localPlayerHumanoid.MoveTo(playerRootPart.Position);
         if (isPlayerInAir(player)) jump();
       }
     },
@@ -287,7 +294,7 @@ const functions: AvailableFunctions = [
           "Stops walking to a player, same as 'unfollowing' a player.",
       },
     },
-    callback: function () {
+    callback: () => {
       store.set("WalkingToPlayer", false);
 
       const localPlayerHumanoid = getPlayerHumanoid(localPlayer);
@@ -325,13 +332,13 @@ const functions: AvailableFunctions = [
         strict: true,
       },
     },
-    callback: function ({
+    callback: ({
       amount = 1,
       interval = 0,
     }: {
       amount: number;
       interval: number;
-    }) {
+    }) => {
       for (let i = 0; i < amount; i++) {
         if (jump()) {
           task.wait(interval);
@@ -360,7 +367,7 @@ const functions: AvailableFunctions = [
         strict: true,
       },
     },
-    callback: function ({ speed = 16 }: { speed: number }) {
+    callback: ({ speed = 16 }: { speed: number }) => {
       const localPlayerHumanoid = getPlayerHumanoid(localPlayer);
 
       if (localPlayerHumanoid) {
@@ -389,7 +396,7 @@ const functions: AvailableFunctions = [
         strict: true,
       },
     },
-    callback: function ({ power = 50 }: { power: number }) {
+    callback: ({ power = 50 }: { power: number }) => {
       const localPlayerHumanoid = getPlayerHumanoid(localPlayer);
 
       if (localPlayerHumanoid) {
@@ -451,11 +458,11 @@ function parseFunctionArguments<T>(func: ToolCallFunction): T | undefined {
   }
 }
 
-function createChatCompletion(content: string, name: string) {
+function createChatCompletion(content: string, speaker: Player) {
   const message: Message = {
     role: "user",
-    content: `${name}: ${content}`,
-    name,
+    content: `${speaker.Name}: ${content}`,
+    name: speaker.Name,
   };
 
   addMessage(message);
@@ -505,6 +512,8 @@ function createChatCompletion(content: string, name: string) {
     return;
   }
 
+  lookAtPlayer(speaker, (responseMessage?.tool_calls?.size() || 0) > 0);
+
   if (responseMessage.content) {
     addMessage(responseMessage);
 
@@ -532,7 +541,7 @@ function createChatCompletion(content: string, name: string) {
         log("debug", "AI", `${functionName}, ${httpService.JSONEncode(args)}`);
 
         task.spawn(function () {
-          func.callback(undefined, args);
+          func.callback(args);
         });
       }
     }

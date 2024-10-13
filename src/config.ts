@@ -10,16 +10,17 @@ interface Script {
 
 interface Settings {
   AntiAFK: boolean;
-  MinimumDistance: number | undefined;
-  MessageProcessDelay: number | undefined;
+  MinimumDistance?: number;
+  MessageProcessDelay?: number;
+  LookSpeed?: number;
 }
 
 interface AI {
   Prompt: string;
   Model: string;
   EnabledFunctions: Array<string>;
-  MaximumCharacterLimit: number | undefined;
-  MaximumMessageContext: number | undefined;
+  MaximumCharacterLimit?: number;
+  MaximumMessageContext?: number;
   Api: string;
   Key: string;
 }
