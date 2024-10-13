@@ -22,11 +22,11 @@ export function isTagged(message: string): boolean {
 }
 
 function playerInDistance(player: Player): boolean {
-  if (!config.Settings.MinimumDistance) {
+  if (!(config.Settings.MinimumDistance && getPlayerRootPart(player))) {
     return true;
   }
 
-  const position = player.Character && getPlayerRootPart(localPlayer)?.Position;
+  const position = getPlayerRootPart(localPlayer)?.Position;
 
   return position
     ? player.DistanceFromCharacter(position) <= config.Settings.MinimumDistance
