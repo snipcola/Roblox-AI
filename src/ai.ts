@@ -1,4 +1,4 @@
-import chat from "chat";
+import chat, { Whisper } from "chat";
 import config from "config";
 import {
   HttpResponse,
@@ -109,7 +109,7 @@ interface Response {
 
 interface AvailableFunction {
   tool: Tool;
-  callback: (args?: object) => Function;
+  callback: (args?: object, whisper?: Whisper) => Function;
 }
 
 type AvailableFunctions = Array<AvailableFunction>;
@@ -155,17 +155,20 @@ const functions: AvailableFunctions = [
         strict: true,
       },
     },
-    callback: ({
-      message,
-      amount = 1,
-      interval = 0,
-    }: {
-      message: string;
-      amount: number;
-      interval: number;
-    }) => {
+    callback: (
+      {
+        message,
+        amount = 1,
+        interval = 0,
+      }: {
+        message: string;
+        amount: number;
+        interval: number;
+      },
+      whisper?: Whisper,
+    ) => {
       for (let i = 0; i < amount; i++) {
-        aiSendMessage(message);
+        aiSendMessage(message, whisper);
         task.wait(interval);
       }
     },
@@ -441,13 +444,18 @@ function addMessage(message: Message) {
   store.set("AIMessages", messages);
 }
 
-function aiSendMessage(message: string) {
-  store.set("AIMessageSent", true);
-  chat.sendMessage(message);
+export interface AIMessage {
+  message: string;
+  whisper?: Whisper;
 }
 
-function failedChatCompletion() {
-  aiSendMessage("⛔ Sorry, something went wrong. Try again.");
+function aiSendMessage(message: string, whisper?: Whisper) {
+  store.set<AIMessage>("AIMessage", { message, whisper });
+  chat.sendMessage(message, whisper);
+}
+
+function failedChatCompletion(whisper?: Whisper) {
+  aiSendMessage("⛔ Sorry, something went wrong. Try again.", whisper);
 }
 
 function parseFunctionArguments<T>(func: ToolCallFunction): T | undefined {
@@ -458,7 +466,11 @@ function parseFunctionArguments<T>(func: ToolCallFunction): T | undefined {
   }
 }
 
-function createChatCompletion(content: string, speaker: Player) {
+function createChatCompletion(
+  content: string,
+  speaker: Player,
+  whisper?: Whisper,
+) {
   const message: Message = {
     role: "user",
     content: `${speaker.Name}: ${content}`,
@@ -470,7 +482,7 @@ function createChatCompletion(content: string, speaker: Player) {
   const data: Request = {
     model: config.AI.Model,
     messages: [...systemMessages, ...messages],
-    ...(tools.size() > 0
+    ...(!tools.isEmpty()
       ? {
           tools,
           parallel_tool_calls: true,
@@ -491,15 +503,16 @@ function createChatCompletion(content: string, speaker: Player) {
   );
 
   if (!response || response.Success === false) {
-    failedChatCompletion();
+    failedChatCompletion(whisper);
     log("error", "AI", "Request not successful");
+    if (response) log("error", "AI", response.Body);
     return;
   }
 
   try {
     response = httpService.JSONDecode(response.Body) as Response;
   } catch {
-    failedChatCompletion();
+    failedChatCompletion(whisper);
     log("error", "AI", "Failed to parse response");
     return;
   }
@@ -507,12 +520,12 @@ function createChatCompletion(content: string, speaker: Player) {
   const responseMessage = response?.choices?.shift()?.message;
 
   if (!responseMessage) {
-    failedChatCompletion();
+    failedChatCompletion(whisper);
     log("error", "AI", "No response message");
     return;
   }
 
-  lookAtPlayer(speaker, (responseMessage?.tool_calls?.size() || 0) > 0);
+  lookAtPlayer(speaker, !responseMessage?.tool_calls?.isEmpty());
 
   if (responseMessage.content) {
     addMessage(responseMessage);
@@ -521,7 +534,7 @@ function createChatCompletion(content: string, speaker: Player) {
       ? responseMessage?.content?.sub(0, config.AI.MaximumCharacterLimit)
       : responseMessage?.content;
 
-    aiSendMessage(messageContent);
+    aiSendMessage(messageContent, whisper);
     log("debug", "AI", messageContent);
   }
 
@@ -541,7 +554,7 @@ function createChatCompletion(content: string, speaker: Player) {
         log("debug", "AI", `${functionName}, ${httpService.JSONEncode(args)}`);
 
         task.spawn(function () {
-          func.callback(args);
+          func.callback(args, whisper);
         });
       }
     }

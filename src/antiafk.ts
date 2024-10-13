@@ -1,6 +1,7 @@
 import config from "config";
 import store from "store";
 import log from "log";
+import { getCustomService } from "functions";
 
 const players = game.GetService("Players");
 const localPlayer = players.LocalPlayer;
@@ -16,7 +17,7 @@ type PossiblyVirtualUser = VirtualUser | undefined;
 let VirtualUser: PossiblyVirtualUser;
 
 try {
-  VirtualUser = game.FindService("VirtualUser") as PossiblyVirtualUser;
+  VirtualUser = getCustomService<PossiblyVirtualUser>("VirtualUser");
 } catch {
   log("error", "AntiAFK", "VirtualUser not found.");
 }

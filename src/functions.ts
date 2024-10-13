@@ -18,7 +18,7 @@ export function isLocalPlayer(player: Player): boolean {
 
 export function isTagged(message: string): boolean {
   const match = message.match("^#+$");
-  return match?.size() > 0;
+  return !match?.isEmpty();
 }
 
 function playerInDistance(player: Player): boolean {
@@ -35,7 +35,7 @@ function playerInDistance(player: Player): boolean {
 
 function isWhitelisted(player: Player) {
   const whitelist = config.Script.Whitelist;
-  return whitelist.size() === 0 || whitelist.includes(player.Name);
+  return whitelist.isEmpty() || whitelist.includes(player.Name);
 }
 
 function isBlacklisted(player: Player) {
@@ -169,4 +169,8 @@ export function sendRequest(
   } catch {
     log("error", "Request", "Failed to create request.");
   }
+}
+
+export function getCustomService<T>(className: string) {
+  return game.GetService(className as keyof Services) as T;
 }

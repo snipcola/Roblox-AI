@@ -30,7 +30,7 @@ function get<T>(
     : undefined;
 }
 
-function set<T>(key: string, value: T): T {
+function set<T>(key: string, value?: T): T {
   store()[format(key)] = value;
   return value as T;
 }
