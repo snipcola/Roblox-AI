@@ -1,39 +1,41 @@
-import log from "log";
-import {
-  waitForGameLoad,
-  isLocalPlayer,
-  isPlayerAllowed,
-  isTagged,
-} from "functions";
-import chat from "chat";
-import config from "config";
-import ai, { AIMessage } from "ai";
-import antiafk from "antiafk";
-import store from "store";
+import logger, { LogType } from "classes/logger";
+import { waitForGameLoad } from "lib/functions";
+import _messages, { Message } from "classes/messages";
+import config, { Store } from "lib/config";
+import AI from "classes/ai";
+import antiafk from "classes/antiafk";
+import store from "classes/store";
 
-log("debug", "Script", "Started execution");
+logger.log(LogType.Debug, "Script", "Started execution");
 
 waitForGameLoad();
-antiafk.initialize();
+antiafk();
 
 let locked = false;
+const ai = new AI();
 
-chat.onMessage(function (message, speaker, whisper) {
-  if (isLocalPlayer(speaker)) {
-    const aiMessage = store.get<AIMessage>("AIMessage");
+const messages = _messages(function (chatMessage: Message) {
+  const { message, sender } = chatMessage;
 
-    if (aiMessage && isTagged(message)) {
-      chat.sendMessage(
-        "⛔ Sorry, my message was tagged. Try again or re-phrase your message.",
-        aiMessage.whisper,
-      );
-    }
-
-    store.set("AIMessage");
+  if (!(messages && sender)) {
     return;
   }
 
-  if (locked || !isPlayerAllowed(speaker) || isTagged(message)) {
+  if (sender?.local) {
+    const aiMessage = store.get<Message>(Store.AIMessage);
+
+    if (aiMessage && chatMessage.tagged()) {
+      messages.sendLocal(
+        aiMessage,
+        "⛔ Sorry, my message was tagged. Try again or re-phrase your message.",
+      );
+    }
+
+    store.set(Store.AIMessage);
+    return;
+  }
+
+  if (locked || !sender.allowed() || chatMessage.tagged()) {
     return;
   }
 
@@ -47,8 +49,8 @@ chat.onMessage(function (message, speaker, whisper) {
     });
   }
 
-  log("debug", "Message", `${speaker.Name}: "${message}"`);
-  ai.createChatCompletion(message, speaker, whisper);
+  logger.log(LogType.Debug, "Message", `${sender.name}: "${message}"`);
+  ai.createChatCompletion(messages, chatMessage);
 });
 
-log("debug", "Script", "Completed execution");
+logger.log(LogType.Debug, "Script", "Completed execution");

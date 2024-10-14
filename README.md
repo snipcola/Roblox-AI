@@ -24,6 +24,7 @@ getgenv()["RobloxAI.Config"] = {
     Model = "gpt-4o-mini",
     EnabledFunctions = {
       "sendMessage",
+      "lookAtPlayer",
       "teleportToPlayer",
       "walkToPlayer",
       "stopWalkingToPlayer",

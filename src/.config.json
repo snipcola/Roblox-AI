@@ -16,6 +16,7 @@
     "Model": "gpt-4o-mini",
     "EnabledFunctions": [
       "sendMessage",
+      "lookAtPlayer",
       "teleportToPlayer",
       "walkToPlayer",
       "stopWalkingToPlayer",

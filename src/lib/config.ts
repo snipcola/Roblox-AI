@@ -1,5 +1,15 @@
 import { Script, Settings, AI } from ".config.json";
-import store from "store";
+import store from "classes/store";
+
+export enum Store {
+  Instance = "Instance",
+  AIMessage = "AI.Message",
+  AIMessages = "AI.Messages",
+  Messages = "Messages",
+  PlayersWalking = "Players.Walking",
+  AntiAFK = "AntiAFK",
+  Config = "Config",
+}
 
 interface Script {
   Name: string;
@@ -31,12 +41,10 @@ interface Config {
   AI: AI;
 }
 
-export default store.get<Config>(
-  "Config",
-  {
-    Script,
-    Settings,
-    AI,
-  },
-  false,
-);
+const defaultConfig: Config = {
+  Script,
+  Settings,
+  AI,
+};
+
+export default store.get<Config>(Store.Config, defaultConfig, false);
