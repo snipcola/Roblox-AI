@@ -147,7 +147,7 @@ const functions: AvailableFunctions = [
       type: "function",
       function: {
         name: "walkToPlayer",
-        description: "Walks to a player, same as 'following'.",
+        description: "Walks to a player.",
         parameters: {
           type: "object",
           properties: {
@@ -155,27 +155,41 @@ const functions: AvailableFunctions = [
               type: "string",
               description: "The name of the player to walk to.",
             },
-            follow: {
-              type: "boolean",
-              description:
-                "Set to false, only set to true if player explicitly mentions 'follow'.",
-            },
           },
-          required: ["player", "follow"],
+          required: ["player"],
           additionalProperties: false,
         },
         strict: true,
       },
     },
-    callback: ({
-      player: name,
-      follow = false,
-    }: {
-      player: string;
-      follow: boolean;
-    }) => {
+    callback: ({ player: name }: { player: string }) => {
       const player = players.fromPartial(name);
-      if (player) players.walkTo(player, follow);
+      if (player) players.walkTo(player);
+    },
+  },
+  {
+    tool: {
+      type: "function",
+      function: {
+        name: "followPlayer",
+        description: "Follow a player indefinitely.",
+        parameters: {
+          type: "object",
+          properties: {
+            player: {
+              type: "string",
+              description: "The name of the player to follow.",
+            },
+          },
+          required: ["player"],
+          additionalProperties: false,
+        },
+        strict: true,
+      },
+    },
+    callback: ({ player: name }: { player: string }) => {
+      const player = players.fromPartial(name);
+      if (player) players.walkTo(player, true);
     },
   },
   {
@@ -184,7 +198,7 @@ const functions: AvailableFunctions = [
       function: {
         name: "stopWalkingToPlayer",
         description:
-          "Stops walking to a player, same as 'unfollowing' a player.",
+          "Stops walking to, or following, a player - also known as 'unfollowing'.",
       },
     },
     callback: () => {

@@ -27,6 +27,7 @@ getgenv()["RobloxAI.Config"] = {
       "lookAtPlayer",
       "teleportToPlayer",
       "walkToPlayer",
+      "followPlayer",
       "stopWalkingToPlayer",
       "jump",
       "setWalkSpeed",
