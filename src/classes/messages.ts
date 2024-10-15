@@ -42,11 +42,8 @@ function getSendEvent(): SendEvent | undefined {
 function send({ message }: { message: string }): void {
   const event = getSendEvent();
 
-  if (event?.IsA("TextChannel")) {
-    event.SendAsync(message);
-  } else if (event?.IsA("RemoteEvent")) {
-    event.FireServer(message, "All");
-  }
+  if (event?.IsA("TextChannel")) event.SendAsync(message);
+  else if (event?.IsA("RemoteEvent")) event.FireServer(message, "All");
 }
 
 export class Message {
@@ -60,9 +57,7 @@ export class Message {
   }
 
   private getWhisper(input: TextChannel | LegacyMessage | undefined): boolean {
-    if (!input) {
-      return false;
-    }
+    if (!input) return false;
 
     return "Name" in input
       ? input?.Name?.lower().split(":").shift() === "rbxwhisper"
@@ -120,9 +115,7 @@ export class Messages extends Connection {
 }
 
 function getEvent(): RBXScriptSignal | undefined {
-  if (getNew()) {
-    return textChatService.MessageReceived;
-  }
+  if (getNew()) return textChatService.MessageReceived;
 
   const onMessageDoneFiltering: Instance | undefined = replicatedStorage
     .FindFirstChild("DefaultChatSystemChatEvents")

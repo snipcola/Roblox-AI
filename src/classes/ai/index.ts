@@ -157,10 +157,7 @@ class AI {
 
   createChatCompletion(chatMessages: ChatMessages, chatMessage: ChatMessage) {
     const { message: content, sender } = chatMessage;
-
-    if (!sender) {
-      return;
-    }
+    if (!sender) return;
 
     const message: Message = {
       role: "user",

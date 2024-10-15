@@ -112,8 +112,7 @@ const functions: AvailableFunctions = [
       },
     },
     callback: ({ player: name }: { player: string }) => {
-      const player = players.fromPartial(name);
-      if (player) player.lookAt();
+      players.fromPartial(name)?.lookAt();
     },
   },
   {
@@ -138,8 +137,7 @@ const functions: AvailableFunctions = [
       },
     },
     callback: ({ player: name }: { player: string }) => {
-      const player = players.fromPartial(name);
-      if (player) player.teleportTo();
+      players.fromPartial(name)?.teleportTo();
     },
   },
   {
@@ -238,9 +236,7 @@ const functions: AvailableFunctions = [
       interval: number;
     }) => {
       for (let i = 0; i < amount; i++) {
-        if (localPlayer.jump()) {
-          task.wait(interval);
-        }
+        if (localPlayer.jump()) task.wait(interval);
       }
     },
   },

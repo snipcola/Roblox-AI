@@ -13,10 +13,7 @@ class Store {
   get<T>(key: string): T | undefined;
   get<T>(key: string, fallback?: T, setFallback?: boolean): T | undefined {
     const value = this.store()[this.format(key)];
-
-    if (value !== undefined) {
-      return value as T;
-    }
+    if (value !== undefined) return value as T;
 
     return fallback
       ? setFallback
