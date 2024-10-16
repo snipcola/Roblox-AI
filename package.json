@@ -1,7 +1,7 @@
 {
   "name": "roblox-ai",
   "author": "Snipcola",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "license": "MIT",
   "type": "commonjs",
   "files": [
@@ -11,31 +11,24 @@
     "access": "public"
   },
   "scripts": {
-    "build": "node assets/ci/build",
-    "prepublishOnly": "node assets/ci/build",
-    "dev": "node assets/ci/dev",
-    "clean": "node assets/ci/clean",
-    "release": "git push origin main:release --force",
+    "build": "roblox-ts-script --build",
+    "prepublishOnly": "roblox-ts-script --build",
+    "dev": "roblox-ts-script --dev",
+    "dev-sync": "roblox-ts-script --dev --sync",
+    "clean": "roblox-ts-script --clean",
     "lint": "eslint src",
-    "format": "prettier --write \"src/**/*\""
+    "format": "prettier --write \"src/**/*\"",
+    "release": "git push origin main:release --force"
   },
   "devDependencies": {
-    "@file/types": "file:assets/types",
     "@rbxts/compiler-types": "3.0.0-types.0",
     "@rbxts/types": "1.0.810",
     "@typescript-eslint/eslint-plugin": "8.8.1",
     "@typescript-eslint/parser": "8.8.1",
-    "chokidar": "4.0.1",
-    "colorette": "2.0.20",
     "eslint": "8.57.1",
-    "eslint-config-prettier": "9.1.0",
-    "eslint-plugin-prettier": "5.2.1",
     "eslint-plugin-roblox-ts": "0.0.36",
-    "lookpath": "1.2.2",
     "prettier": "3.3.3",
-    "roblox-ts": "3.0.0",
-    "semver": "7.6.3",
-    "typescript": "5.6.2",
-    "yocto-spinner": "0.1.0"
+    "roblox-ts-script": "0.0.2",
+    "typescript": "5.6.2"
   }
 }

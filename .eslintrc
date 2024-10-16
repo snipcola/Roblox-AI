@@ -7,7 +7,7 @@
     "sourceType": "module",
     "project": "**/tsconfig.json",
   },
-  "ignorePatterns": ["out", "node_modules", "assets/ci"],
+  "ignorePatterns": ["out", "node_modules"],
   "plugins": [
     "roblox-ts",
     "@typescript-eslint",
