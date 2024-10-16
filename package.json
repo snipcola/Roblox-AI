@@ -1,7 +1,7 @@
 {
   "name": "roblox-ai",
   "author": "Snipcola",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "license": "MIT",
   "type": "commonjs",
   "files": [
@@ -16,6 +16,7 @@
     "dev": "roblox-ts-script --dev",
     "dev-sync": "roblox-ts-script --dev --sync",
     "clean": "roblox-ts-script --clean",
+    "scope": "roblox-ts-script --scope",
     "lint": "eslint src",
     "format": "prettier --write \"src/**/*\"",
     "release": "git push origin main:release --force"
@@ -28,7 +29,7 @@
     "eslint": "8.57.1",
     "eslint-plugin-roblox-ts": "0.0.36",
     "prettier": "3.3.3",
-    "roblox-ts-script": "0.0.2",
+    "roblox-ts-script": "0.0.3",
     "typescript": "5.6.2"
   }
 }
