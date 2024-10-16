@@ -31,9 +31,9 @@ type ToolCalls = Array<ToolCall>;
 
 interface Message {
   role: Role;
-  content: string | undefined;
+  content?: string;
   name?: string;
-  refusal?: string | undefined;
+  refusal?: string;
   tool_calls?: ToolCalls;
 }
 
@@ -87,7 +87,7 @@ interface Response {
   system_fingerprint: string;
   choices: Choices;
   usage: Usage;
-  service_tier: string | undefined;
+  service_tier?: string;
 }
 
 class AI {

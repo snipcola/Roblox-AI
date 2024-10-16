@@ -1,4 +1,4 @@
-import { Script, Settings, AI } from ".config.json";
+import defaultConfig from "config";
 import store from "classes/store";
 
 export enum Store {
@@ -35,16 +35,10 @@ interface AI {
   Key: string;
 }
 
-interface Config {
+export interface Config {
   Script: Script;
   Settings: Settings;
   AI: AI;
 }
-
-const defaultConfig: Config = {
-  Script,
-  Settings,
-  AI,
-};
 
 export default store.get<Config>(Store.Config, defaultConfig, false);
