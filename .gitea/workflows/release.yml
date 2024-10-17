@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - release
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build, Bundle, & Release
+    runs-on: ubuntu
+
+    env:
+      SERVER_URL: https://git.snipcola.com
+      AFTMAN: https://github.com/LPGhatguy/aftman/releases/download/v0.3.0/aftman-0.3.0-linux-x86_64.zip
+
+    steps:
+      - name: Preparation
+        run: |
+          apt-get update
+          apt-get install -y jq
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          github-server-url: ${{ env.SERVER_URL }}
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.10.0
+          run_install: true
+
+      - name: Install Aftman
+        run: |
+          curl -L ${{ env.AFTMAN }} -o /tmp/aftman.zip
+          unzip /tmp/aftman.zip -d /tmp
+          /tmp/aftman self-install
+          echo "github = \"${{ secrets.gh_auth }}\"" > ~/.aftman/auth.toml
+
+      - name: Install Aftman Dependencies
+        run: ~/.aftman/bin/aftman install --no-trust-check
+
+      - name: ESLint Check
+        run: pnpm lint
+
+      - name: Build & Bundle
+        run: pnpm build
+
+      - name: Get Version
+        id: version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+      - name: Release
+        uses: akkuman/gitea-release-action@v1
+        with:
+          server_url: ${{ env.SERVER_URL }}
+          token: ${{ secrets.auth }}
+          body: This is automated, the script(s) should be attached. 📜
+          name: 📦 Release ${{ steps.version.outputs.current-version }}
+          tag_name: ${{ steps.version.outputs.current-version }}
+          files: "out/*.lua"
