@@ -1,6 +1,6 @@
 import logger, { LogType } from "classes/logger";
 import { waitForGameLoad } from "lib/functions";
-import _messages, { Message } from "classes/messages";
+import messages, { Message } from "classes/messages";
 import config, { Store } from "lib/config";
 import AI from "classes/ai";
 import antiafk from "classes/antiafk";
@@ -14,10 +14,10 @@ antiafk();
 let locked = false;
 const ai = new AI();
 
-const messages = _messages(function (chatMessage: Message) {
+const chatMessages = messages(function (chatMessage: Message) {
   const { message, sender } = chatMessage;
 
-  if (!(messages && sender)) {
+  if (!(chatMessages && sender)) {
     return;
   }
 
@@ -25,7 +25,7 @@ const messages = _messages(function (chatMessage: Message) {
     const aiMessage = store.get<Message>(Store.AIMessage);
 
     if (aiMessage && chatMessage.tagged()) {
-      messages.sendLocal(
+      chatMessages.sendLocal(
         aiMessage,
         "⛔ Sorry, my message was tagged. Try again or re-phrase your message.",
       );
@@ -50,7 +50,7 @@ const messages = _messages(function (chatMessage: Message) {
   }
 
   logger.log(LogType.Debug, "Message", `${sender.name}: "${message}"`);
-  ai.createChatCompletion(messages, chatMessage);
+  ai.createChatCompletion(chatMessages, chatMessage);
 });
 
 logger.log(LogType.Debug, "Script", "Completed execution");
