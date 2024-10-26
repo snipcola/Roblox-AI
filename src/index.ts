@@ -21,7 +21,7 @@ const chatMessages = messages(function (chatMessage: Message) {
     return;
   }
 
-  if (sender?.local) {
+  if (sender.local) {
     const aiMessage = store.get<Message>(Store.AIMessage);
 
     if (aiMessage && chatMessage.tagged()) {
