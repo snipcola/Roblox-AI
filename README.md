@@ -1,7 +1,7 @@
 ## Roblox-AI
 
 Automates your Roblox character, enabling communication with others and custom functions.<br/>
-**Note:** This project was created with [Create-Roblox-TS-Script](https://git.snipcola.com/snipcola/Create-Roblox-TS-Script) - refer to there for compilation.
+**Note:** This project was created with [Create-Roblox-TS-Script](https://git.snipcola.com/snipcola/Create-Roblox-TS-Script) - refer there for compilation.
 
 ## Script
 
