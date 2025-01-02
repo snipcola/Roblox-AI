@@ -40,5 +40,5 @@ getgenv()["RobloxAI.Config"] = {
   }
 }
 
-loadstring(game:HttpGetAsync("https://git.snipcola.com/snipcola/Roblox-AI/releases/download/latest/script.min.lua"))()
+loadstring(game:HttpGetAsync("https://git.snipcola.com/snipcola/Roblox-AI/releases/download/latest/script.min.luau"))()
 ```

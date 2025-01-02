@@ -7,7 +7,7 @@
       "StarterPlayerScripts": {
         "$className": "StarterPlayerScripts",
         "Script": {
-          "$path": "script.client.lua"
+          "$path": "script.client.luau"
         }
       }
     }

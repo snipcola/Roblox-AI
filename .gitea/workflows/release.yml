@@ -60,4 +60,4 @@ jobs:
           body: This is automated, the script(s) should be attached. 📜
           name: 📦 Release ${{ steps.version.outputs.current-version }}
           tag_name: ${{ steps.version.outputs.current-version }}
-          files: "out/*.lua"
+          files: "out/*.luau"

@@ -58,7 +58,7 @@ class HTTP {
     };
 
     try {
-      const { Success, Body } = request ? request(args) : this.library(args);
+      const { Success, Body } = this.library(args);
       return { Success, Body };
     } catch {
       logger.log(LogType.Error, "Request", "Failed to create request.");

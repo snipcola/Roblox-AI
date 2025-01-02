@@ -5,5 +5,5 @@ yarn.lock
 .DS_Store
 
 /out
-/script.lua
-/assets/rojo/studio/script.client.lua
+/script.luau
+/assets/rojo/studio/script.client.luau
