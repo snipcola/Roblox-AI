@@ -1,7 +1,7 @@
 {
   "name": "roblox-ai",
   "author": "snipcola",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "license": "MIT",
   "type": "module",
   "files": [
@@ -31,7 +31,7 @@
     "globals": "15.14.0",
     "isentinel-eslint-plugin-roblox-ts": "0.0.37",
     "prettier": "3.4.2",
-    "roblox-ts-script": "0.1.8",
+    "roblox-ts-script": "0.1.9",
     "typescript": "5.7.2",
     "typescript-eslint": "8.19.1"
   }
