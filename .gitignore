@@ -1,8 +1,5 @@
 node_modules
-pnpm-lock.yaml
-package-lock.json
-yarn.lock
-.DS_Store
+bun.lock
 
 /out
 /script.luau

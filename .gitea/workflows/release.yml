@@ -27,11 +27,13 @@ jobs:
         with:
           github-server-url: ${{ env.SERVER_URL }}
 
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4.0.0
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2.0.1
         with:
-          version: 9.10.0
-          run_install: true
+          bun-version: 1.2.2
+
+      - name: Install Dependencies
+        run: bun install
 
       - name: Setup Aftman
         uses: ok-nick/setup-aftman@v0.4.2
@@ -43,10 +45,10 @@ jobs:
         run: aftman install --no-trust-check
 
       - name: ESLint Check
-        run: pnpm lint
+        run: bun run lint
 
       - name: Build & Bundle
-        run: pnpm build
+        run: bun run build
 
       - name: Get Version
         id: version
