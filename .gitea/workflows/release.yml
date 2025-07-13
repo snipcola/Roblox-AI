@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu
 
     env:
-      SERVER_URL: https://git.snipcola.com
+      SERVER_URL: https://code.snipcola.com
 
     steps:
       - name: Preparation
@@ -30,7 +30,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4.2.0
         with:
-          node-version: 23.8.0
+          node-version: 24.4.0
 
       - name: Install Dependencies
         run: npm install
@@ -55,7 +55,7 @@ jobs:
         uses: martinbeentjes/npm-get-version-action@v1.3.1
 
       - name: Release
-        uses: akkuman/gitea-release-action@v1.3.2
+        uses: akkuman/gitea-release-action@v1.3.4
         with:
           server_url: ${{ env.SERVER_URL }}
           token: ${{ secrets.auth }}
