@@ -13,9 +13,6 @@ jobs:
     name: Build, Bundle, & Release
     runs-on: ubuntu
 
-    env:
-      SERVER_URL: https://code.snipcola.com
-
     steps:
       - name: Preparation
         run: |
@@ -23,14 +20,12 @@ jobs:
           apt-get install -y jq gh
 
       - name: Checkout
-        uses: actions/checkout@v4.2.2
-        with:
-          github-server-url: ${{ env.SERVER_URL }}
+        uses: actions/checkout@v4.3.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4.2.0
+        uses: actions/setup-node@v4.4.0
         with:
-          node-version: 24.4.0
+          node-version: 24.6.0
 
       - name: Install Dependencies
         run: npm install
@@ -39,7 +34,7 @@ jobs:
         uses: ok-nick/setup-aftman@v0.4.2
         with:
           version: v0.3.0
-          token: ${{ secrets.gh_auth }}
+          token: ${{ secrets.GH_AUTH }}
 
       - name: Install Aftman Dependencies
         run: aftman install --no-trust-check
@@ -51,15 +46,15 @@ jobs:
         run: npm run build
 
       - name: Get Version
+        uses: saionaro/extract-package-version@v1.3.0
         id: version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
 
       - name: Release
-        uses: akkuman/gitea-release-action@v1.3.4
+        uses: akkuman/gitea-release-action@v1.3.5
         with:
-          server_url: ${{ env.SERVER_URL }}
-          token: ${{ secrets.auth }}
+          server_url: ${{ env.INTERNAL_SERVER_URL }}
+          token: ${{ secrets.AUTH }}
           body: This is automated, the script(s) should be attached. 📜
-          name: 📦 Release ${{ steps.version.outputs.current-version }}
-          tag_name: ${{ steps.version.outputs.current-version }}
+          name: 📦 Release ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.version }}
           files: "out/*.luau"
