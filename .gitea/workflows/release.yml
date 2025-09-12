@@ -20,12 +20,12 @@ jobs:
           apt-get install -y jq gh
 
       - name: Checkout
-        uses: actions/checkout@v4.3.0
+        uses: actions/checkout@v5.0.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4.4.0
+        uses: actions/setup-node@v5.0.0
         with:
-          node-version: 24.6.0
+          node-version: 24.8.0
 
       - name: Install Dependencies
         run: npm install
