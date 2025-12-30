@@ -14,36 +14,31 @@ jobs:
     runs-on: ubuntu
 
     steps:
-      - name: Preparation
-        run: |
-          apt-get update
-          apt-get install -y jq gh
-
       - name: Checkout
-        uses: actions/checkout@v5.0.0
+        uses: actions/checkout@v6.0.1
 
-      - name: Setup Node
-        uses: actions/setup-node@v5.0.0
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2.0.2
         with:
-          node-version: 24.8.0
+          bun-version: 1.3.5
 
       - name: Install Dependencies
-        run: npm install
+        run: bun ci
 
-      - name: Setup Aftman
-        uses: ok-nick/setup-aftman@v0.4.2
+      - name: Setup Rokit
+        uses: CompeyDev/setup-rokit@v0.1.2
         with:
-          version: v0.3.0
+          version: v1.2.0
           token: ${{ secrets.GH_AUTH }}
 
-      - name: Install Aftman Dependencies
-        run: aftman install --no-trust-check
+      - name: Install Rokit Dependencies
+        run: rokit install --no-trust-check
 
       - name: ESLint Check
-        run: npm run lint
+        run: bun run lint
 
       - name: Build & Bundle
-        run: npm run build
+        run: bun run build
 
       - name: Get Version
         uses: saionaro/extract-package-version@v1.3.0
@@ -54,7 +49,7 @@ jobs:
         with:
           server_url: ${{ env.INTERNAL_SERVER_URL }}
           token: ${{ secrets.AUTH }}
-          body: This is automated, the script(s) should be attached. 📜
+          body: "Automated release: script(s) should be attached: 📜"
           name: 📦 Release ${{ steps.version.outputs.version }}
           tag_name: ${{ steps.version.outputs.version }}
           files: "out/*.luau"
