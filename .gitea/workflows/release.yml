@@ -49,7 +49,7 @@ jobs:
         with:
           server_url: ${{ env.INTERNAL_SERVER_URL }}
           token: ${{ secrets.AUTH }}
-          body: "Automated release: script(s) should be attached: 📜"
+          body: "Automated release, script(s) should be attached: 📜"
           name: 📦 Release ${{ steps.version.outputs.version }}
           tag_name: ${{ steps.version.outputs.version }}
           files: "out/*.luau"
