@@ -1,63 +1,64 @@
-// https://github.com/unified-naming-convention/NamingStandard/tree/main/api/websockets
+/**
+ * The `WebSocket` class provides a lightweight interface for establishing and working with WebSocket connections.
+ * It allows scripts to **send** and **receive** messages over a persistent connection to a [WebSocket](https://en.wikipedia.org/wiki/WebSocket) server.
+ * @see https://docs.sunc.su/WebSocket
+ */
 
-interface WebSocketEvent<T extends Callback> {
-  // TODO: Check if event connections are missing documentation
+/**
+ * Represents a WebSocket event that can be connected to with callbacks.
+ */
+interface WebSocketEvent<T extends (...args: any[]) => void> {
+  /**
+   * Connects a callback function to this event.
+   * @param callback The function to call when the event fires.
+   */
   Connect(callback: T): void;
 }
 
-/**
- * Handles websocket connections.
- * @example
- * const socket = WebSocket.connect("ws://localhost:8080");
- * socket.OnMessage.Connect((message) => print(message));
- * socket.OnClose.Connect(() => print("Websocket closed"));
- * socket.Send("Hello, world!");
- */
 interface WebSocket {
   /**
-   * Sends a message to the server.
-   * @param message The message to send.
+   * Sends data through the WebSocket connection.
+   * @param data The data to send to the server. If the data is a string, it is sent as text. Otherwise, it is sent as binary.
    */
-  Send(message: string): void;
+  Send(data: string): void;
 
   /**
-   * Closes the connection.
-   * @fires WebSocket.OnClose
+   * Closes the WebSocket connection, optionally with a code and reason.
+   * @param code A numeric value indicating the status code explaining why the connection is being closed.
+   * @param reason A human-readable string explaining why the connection is closing.
    */
   Close(): void;
 
   /**
-   * Fired when the Websocked is closed, either by the server or by the client.
+   * An event that fires when a message is received from the server.
    */
-  OnClose: WebSocketEvent<() => void>;
+  OnMessage: WebSocketEvent<(data: string) => void>;
 
   /**
-   * Fired when the Websocket receives a message.
-   * @param message The message received.
+   * An event that fires when the WebSocket connection is closed.
    */
-  OnMessage: WebSocketEvent<(message: string) => void>;
+  OnClose: WebSocketEvent<() => void>;
 }
 
 interface WebSocketConstructor {
   /**
-   * Attempts to connect to the given websocket URL.
-   * @param url The URL to connect to.
-   * @returns The WebSocket object.
+   * Connects to a WebSocket server at the specified URL.
+   * @param url The URL of the WebSocket server to connect to.
+   * @returns A new WebSocket instance connected to the given URL.
    * @example
-   * const socket = WebSocket.connect("ws://localhost:8080");
-   * socket.OnMessage.Connect((message) => print(message));
-   * socket.OnClose.Connect(() => print("Websocket closed"));
-   * socket.Send("Hello, world!");
+   * const ws = WebSocket.connect("wss://ws.postman-echo.com/raw");
+   * ws.OnMessage.Connect((message: string) => {
+   *     print(message);
+   * });
+   * ws.Send("Hello"); // Output: Hello
+   * @example
+   * const ws = WebSocket.connect("wss://ws.postman-echo.com/raw");
+   * ws.OnClose.Connect(() => {
+   *     print("Closed");
+   * });
+   * ws.Close(); // Output: Closed
    */
-  connect: (url: string) => WebSocket;
+  connect(url: string): WebSocket;
 }
 
-/**
- * Handles websocket connections.
- * @example
- * const socket = WebSocket.connect("ws://localhost:8080");
- * socket.OnMessage.Connect((message) => print(message));
- * socket.OnClose.Connect(() => print("Websocket closed"));
- * socket.Send("Hello, world!");
- */
 declare const WebSocket: WebSocketConstructor;

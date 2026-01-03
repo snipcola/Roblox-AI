@@ -1,4 +1,3 @@
-import globals from "globals";
 import tsParser from "@typescript-eslint/parser";
 import eslintJs from "@eslint/js";
 import eslintTs from "typescript-eslint";
@@ -13,9 +12,7 @@ const config = {
   languageOptions: {
     ecmaVersion: 2023,
     sourceType: "module",
-    globals: {
-      ...globals.node,
-    },
+    globals: {},
     parser: tsParser,
     parserOptions: {
       project: ["tsconfig.json"],
